@@ -22,6 +22,8 @@ public sealed class AppSettingsDto
 
     public string? RepositoriesFolderName { get; set; }
 
+    public string? DriversFolderName { get; set; }
+
     public string? FirmwareFolderName { get; set; }
 
     public string? MetadataFolderName { get; set; }
