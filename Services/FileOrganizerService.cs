@@ -13,8 +13,10 @@ public sealed class FileOrganizerService
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _deletedUncategorizedFiles = new(StringComparer.OrdinalIgnoreCase);
     private int _totalMovedFiles;
     private int _totalUnknownFiles;
+    private int _totalDeletedUncategorizedFiles;
 
     public FileOrganizerService(
         AppSettings settings,
@@ -90,6 +92,7 @@ public sealed class FileOrganizerService
 
         if (extension == ".lnk")
         {
+            RecordDeletedUncategorizedFile(extension);
             File.Delete(filePath);
             return;
         }
@@ -220,6 +223,21 @@ public sealed class FileOrganizerService
         }
     }
 
+    private void RecordDeletedUncategorizedFile(string extension)
+    {
+        _totalDeletedUncategorizedFiles++;
+        var key = string.IsNullOrWhiteSpace(extension) ? "(no extension)" : extension;
+
+        if (_deletedUncategorizedFiles.ContainsKey(key))
+        {
+            _deletedUncategorizedFiles[key]++;
+        }
+        else
+        {
+            _deletedUncategorizedFiles[key] = 1;
+        }
+    }
+
     private void ValidateCategoryExtensions()
     {
         var extensionToCategories = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
@@ -277,6 +295,19 @@ public sealed class FileOrganizerService
             foreach (var unknown in _unknownExtensions.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
             {
                 Console.WriteLine($"  {unknown.Key}: {unknown.Value}");
+            }
+        }
+
+        if (_totalDeletedUncategorizedFiles == 0)
+        {
+            Console.WriteLine("Deleted uncategorized files: none");
+        }
+        else
+        {
+            Console.WriteLine($"Deleted uncategorized files: {_totalDeletedUncategorizedFiles}");
+            foreach (var deleted in _deletedUncategorizedFiles.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"  {deleted.Key}: {deleted.Value}");
             }
         }
 
