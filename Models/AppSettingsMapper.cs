@@ -19,6 +19,7 @@ public static class AppSettingsMapper
             Require(dto.MusicFolderName, nameof(dto.MusicFolderName)),
             Require(dto.MusicalInstrumentsFolderName, nameof(dto.MusicalInstrumentsFolderName)),
             Require(dto.EBooksFolderName, nameof(dto.EBooksFolderName)),
+            Require(dto.RepositoriesFolderName, nameof(dto.RepositoriesFolderName)),
             Require(dto.FirmwareFolderName, nameof(dto.FirmwareFolderName)),
             Require(dto.MetadataFolderName, nameof(dto.MetadataFolderName)),
             Require(dto.UnknownFolderName, nameof(dto.UnknownFolderName)),

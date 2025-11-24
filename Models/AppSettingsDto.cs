@@ -20,6 +20,8 @@ public sealed class AppSettingsDto
 
     public string? EBooksFolderName { get; set; }
 
+    public string? RepositoriesFolderName { get; set; }
+
     public string? FirmwareFolderName { get; set; }
 
     public string? MetadataFolderName { get; set; }
