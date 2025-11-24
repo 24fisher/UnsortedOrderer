@@ -4,17 +4,47 @@ namespace UnsortedOrderer.Services;
 
 public interface IPhotoService
 {
-    string MovePhoto(string filePath, string destinationRoot, string imagesFolderName);
+    bool IsPhoto(string filePath);
+
+    string MovePhoto(string filePath, string destinationRoot, string photosFolderName);
 }
 
 public sealed class PhotoService : IPhotoService
 {
+    private const int SmallImageMaxDimension = 512;
+    private const long SmallImageMaxBytes = 300 * 1024;
     private const int DateTakenId = 0x9003; // PropertyTagExifDTOrig
 
-    public string MovePhoto(string filePath, string destinationRoot, string imagesFolderName)
+    public bool IsPhoto(string filePath)
+    {
+        try
+        {
+            using var image = Image.FromFile(filePath);
+            var maxDimension = Math.Max(image.Width, image.Height);
+
+            if (maxDimension > SmallImageMaxDimension)
+            {
+                return true;
+            }
+
+            if (maxDimension <= SmallImageMaxDimension)
+            {
+                var fileSize = new FileInfo(filePath).Length;
+                return fileSize > SmallImageMaxBytes;
+            }
+        }
+        catch
+        {
+            // fall back to file heuristics
+        }
+
+        return new FileInfo(filePath).Length > SmallImageMaxBytes;
+    }
+
+    public string MovePhoto(string filePath, string destinationRoot, string photosFolderName)
     {
         var year = GetPhotoYear(filePath);
-        var photoDirectory = Path.Combine(destinationRoot, imagesFolderName, year.ToString());
+        var photoDirectory = Path.Combine(destinationRoot, photosFolderName, year.ToString());
         return FileUtilities.MoveFile(filePath, photoDirectory);
     }
 

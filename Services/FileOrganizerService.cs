@@ -10,6 +10,7 @@ public sealed class FileOrganizerService
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
     private readonly UnknownCategory _unknownCategory;
     private static readonly string[] DocumentImageKeywords = new[]
     {
@@ -51,6 +52,7 @@ public sealed class FileOrganizerService
         _archiveService = archiveService;
         _photoService = photoService;
         _categories = categories.ToArray();
+        _imageCategories = _categories.OfType<ImageCategoryBase>().ToArray();
         _deletedExtensions = FileUtilities
             .NormalizeExtensions(settings.DeletedExtensions)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -125,7 +127,7 @@ public sealed class FileOrganizerService
         }
 
         var category = TryGetSpecialCategory(filePath, extension)
-            ?? _categories.FirstOrDefault(c => c.Matches(extension));
+            ?? ResolveCategory(filePath, extension);
         if (category is null)
         {
             RecordUnknownFile(extension);
@@ -135,9 +137,13 @@ public sealed class FileOrganizerService
 
         switch (category)
         {
-            case ImagesCategory:
-                var photoDestination = _photoService.MovePhoto(filePath, _settings.DestinationRoot, _settings.ImagesFolderName);
+            case PhotosCategory:
+                var photoDestination = _photoService.MovePhoto(filePath, _settings.DestinationRoot, _settings.PhotosFolderName);
                 RecordMovedFile(photoDestination, category.FolderName);
+                break;
+            case ImagesCategory:
+                var imageDestination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, category.FolderName));
+                RecordMovedFile(imageDestination, category.FolderName);
                 break;
             case ArchivesCategory:
                 HandleArchiveFile(filePath, category.FolderName);
@@ -158,15 +164,14 @@ public sealed class FileOrganizerService
 
     private IFileCategory? TryGetSpecialCategory(string filePath, string extension)
     {
-        var imagesCategory = _categories.OfType<ImagesCategory>().FirstOrDefault();
         var documentsCategory = _categories.OfType<DocumentsCategory>().FirstOrDefault();
 
-        if (imagesCategory is null || documentsCategory is null)
+        if (!_imageCategories.Any() || documentsCategory is null)
         {
             return null;
         }
 
-        if (!imagesCategory.Matches(extension))
+        if (!_imageCategories.Any(category => category.Matches(extension)))
         {
             return null;
         }
@@ -181,6 +186,26 @@ public sealed class FileOrganizerService
         return DocumentImageKeywords.Any(keyword => lowerInvariantName.Contains(keyword))
             ? documentsCategory
             : null;
+    }
+
+    private IFileCategory? ResolveCategory(string filePath, string extension)
+    {
+        if (_imageCategories.Any(category => category.Matches(extension)))
+        {
+            var photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
+            var imagesCategory = _imageCategories.OfType<ImagesCategory>().FirstOrDefault();
+
+            if (photosCategory is null || imagesCategory is null)
+            {
+                return _imageCategories.FirstOrDefault(category => category.Matches(extension));
+            }
+
+            return _photoService.IsPhoto(filePath)
+                ? photosCategory
+                : imagesCategory;
+        }
+
+        return _categories.FirstOrDefault(c => c.Matches(extension));
     }
 
     private void MoveDistributionDirectory(string directory)
@@ -354,24 +379,25 @@ public sealed class FileOrganizerService
 
     private void ValidateCategoryExtensions()
     {
-        var extensionToCategories = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        var extensionToCategories = new Dictionary<string, List<IFileCategory>>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var category in _categories)
         {
             foreach (var extension in category.Extensions)
             {
-                if (!extensionToCategories.TryGetValue(extension, out var categorySet))
+                if (!extensionToCategories.TryGetValue(extension, out var categories))
                 {
-                    categorySet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    extensionToCategories[extension] = categorySet;
+                    categories = new List<IFileCategory>();
+                    extensionToCategories[extension] = categories;
                 }
 
-                categorySet.Add(category.Name);
+                categories.Add(category);
             }
         }
 
         var overlaps = extensionToCategories
             .Where(kvp => kvp.Value.Count > 1)
+            .Where(kvp => !kvp.Value.All(category => category is ImageCategoryBase))
             .ToArray();
 
         if (overlaps.Length == 0)
@@ -380,7 +406,15 @@ public sealed class FileOrganizerService
         }
 
         var overlapDetails = overlaps
-            .Select(kvp => $"{kvp.Key}: {string.Join(", ", kvp.Value.OrderBy(v => v, StringComparer.OrdinalIgnoreCase))}");
+            .Select(kvp =>
+            {
+                var names = kvp.Value
+                    .Select(c => c.Name)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(v => v, StringComparer.OrdinalIgnoreCase);
+
+                return $"{kvp.Key}: {string.Join(", ", names)}";
+            });
 
         throw new InvalidOperationException($"Category extensions overlap: {string.Join("; ", overlapDetails)}");
     }
