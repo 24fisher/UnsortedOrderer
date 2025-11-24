@@ -21,4 +21,6 @@ public sealed class AppSettings
     public string MetadataFolderName { get; set; } = "Metadata";
 
     public string UnknownFolderName { get; set; } = "_Unknown";
+
+    public string[] DeletedExtensions { get; set; } = new[] { ".lnk", ".torrent" };
 }

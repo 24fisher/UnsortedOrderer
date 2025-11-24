@@ -16,6 +16,7 @@ public sealed class FileOrganizerService
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _deletedUncategorizedFiles = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _deletedExtensions;
     private int _totalMovedFiles;
     private int _totalUnknownFiles;
     private int _totalDeletedUncategorizedFiles;
@@ -32,6 +33,9 @@ public sealed class FileOrganizerService
         _archiveService = archiveService;
         _photoService = photoService;
         _categories = categories.ToArray();
+        _deletedExtensions = FileUtilities
+            .NormalizeExtensions(settings.DeletedExtensions)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         _unknownCategory = _categories.OfType<UnknownCategory>().FirstOrDefault()
             ?? throw new InvalidOperationException("Unknown category is missing.");
@@ -95,7 +99,7 @@ public sealed class FileOrganizerService
     {
         var extension = Path.GetExtension(filePath).ToLowerInvariant();
 
-        if (extension == ".lnk")
+        if (_deletedExtensions.Contains(extension))
         {
             RecordDeletedUncategorizedFile(extension);
             File.Delete(filePath);
