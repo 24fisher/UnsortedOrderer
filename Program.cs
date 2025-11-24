@@ -20,6 +20,7 @@ Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
 Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
 Console.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
 Console.WriteLine($"  FirmwareFolderName: {settings.FirmwareFolderName}");
+Console.WriteLine($"  MetadataFolderName: {settings.MetadataFolderName}");
 Console.WriteLine();
 Console.WriteLine("Starting organization...");
 
@@ -35,6 +36,7 @@ var categories = new IFileCategory[]
     new CertificatesCategory(),
     new FirmwareCategory(settings.FirmwareFolderName),
     new DriversCategory(settings.DriversFolderName),
+    new MetadataCategory(settings.MetadataFolderName),
     new SoftCategory(settings.SoftFolderName),
     new UnknownCategory(settings.UnknownFolderName)
 };

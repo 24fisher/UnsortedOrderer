@@ -20,5 +20,7 @@ public sealed class AppSettings
 
     public string FirmwareFolderName { get; set; } = "Firmware";
 
+    public string MetadataFolderName { get; set; } = "Metadata";
+
     public string UnknownFolderName { get; set; } = "_Unknown";
 }
