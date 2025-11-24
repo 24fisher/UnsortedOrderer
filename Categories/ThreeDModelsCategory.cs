@@ -19,6 +19,7 @@ public sealed class ThreeDModelsCategory : FileCategory
         ".iges",
         ".igs",
         ".3mf",
+        ".gcode",
         ".scad"
     ];
 
