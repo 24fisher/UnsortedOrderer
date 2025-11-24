@@ -139,12 +139,25 @@ public sealed class FileOrganizerService
 
     private void HandleArchiveFile(string filePath, string categoryName)
     {
-        var archiveName = Path.GetFileNameWithoutExtension(filePath) ?? string.Empty;
-        var potentialDistributionDirectory = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName, archiveName);
-        if (Directory.Exists(potentialDistributionDirectory))
+        RemoveExistingDistributionDirectory(filePath);
+
+        var matchingCategory = FindMatchingSiblingCategory(filePath);
+        if (matchingCategory is not null)
         {
-            RecordDeletedDirectory(potentialDistributionDirectory);
-            Directory.Delete(potentialDistributionDirectory, recursive: true);
+            var matchingDestinationDirectory = matchingCategory switch
+            {
+                SoftCategory => GetDistributionDestinationDirectory(
+                    Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName),
+                    filePath),
+                ArchivesCategory => GetDistributionDestinationDirectory(
+                    Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName),
+                    filePath),
+                _ => Path.Combine(_settings.DestinationRoot, matchingCategory.FolderName)
+            };
+
+            var matchingArchiveDestination = _archiveService.HandleArchive(filePath, matchingDestinationDirectory);
+            RecordMovedFile(matchingArchiveDestination, matchingCategory.FolderName);
+            return;
         }
 
         var archiveDestinationDirectory = GetDistributionDestinationDirectory(
@@ -152,6 +165,44 @@ public sealed class FileOrganizerService
             filePath);
         var archiveDestination = _archiveService.HandleArchive(filePath, archiveDestinationDirectory);
         RecordMovedFile(archiveDestination, categoryName);
+    }
+
+    private void RemoveExistingDistributionDirectory(string archivePath)
+    {
+        var archiveName = Path.GetFileNameWithoutExtension(archivePath) ?? string.Empty;
+        var potentialDistributionDirectory = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName, archiveName);
+        if (Directory.Exists(potentialDistributionDirectory))
+        {
+            RecordDeletedDirectory(potentialDistributionDirectory);
+            Directory.Delete(potentialDistributionDirectory, recursive: true);
+        }
+    }
+
+    private IFileCategory? FindMatchingSiblingCategory(string archivePath)
+    {
+        var directory = Path.GetDirectoryName(archivePath);
+        var archiveName = Path.GetFileNameWithoutExtension(archivePath);
+
+        if (string.IsNullOrWhiteSpace(directory) || string.IsNullOrWhiteSpace(archiveName))
+        {
+            return null;
+        }
+
+        var matchingFile = Directory
+            .EnumerateFiles(directory)
+            .FirstOrDefault(path => !string.Equals(path, archivePath, StringComparison.OrdinalIgnoreCase)
+                                    && string.Equals(
+                                        Path.GetFileNameWithoutExtension(path),
+                                        archiveName,
+                                        StringComparison.OrdinalIgnoreCase));
+
+        if (matchingFile is null)
+        {
+            return null;
+        }
+
+        var matchedExtension = Path.GetExtension(matchingFile).ToLowerInvariant();
+        return _categories.FirstOrDefault(c => c.Matches(matchedExtension));
     }
 
     private static string GetDistributionDestinationDirectory(string categoryRoot, string filePath)
