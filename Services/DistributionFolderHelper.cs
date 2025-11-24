@@ -20,4 +20,12 @@ public static class DistributionFolderHelper
         var programName = match.Groups["name"].Value.Trim().Trim('-', '_', '.', ' ');
         return string.IsNullOrWhiteSpace(programName) ? null : programName;
     }
+
+    public static string GetDistributionDestinationDirectory(string categoryRoot, string filePath)
+    {
+        var programName = TryGetProgramFolderName(filePath);
+        return programName is null
+            ? categoryRoot
+            : Path.Combine(categoryRoot, programName);
+    }
 }
