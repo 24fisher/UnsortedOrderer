@@ -16,5 +16,7 @@ public sealed class AppSettings
 
     public string MusicalInstrumentsFolderName { get; set; } = "Instruments";
 
+    public string FirmwareFolderName { get; set; } = "Firmware";
+
     public string UnknownFolderName { get; set; } = "_Unknown";
 }
