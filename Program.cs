@@ -6,7 +6,6 @@ using UnsortedOrderer.Services;
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
-    .AddEnvironmentVariables()
     .Build();
 
 var settings = configuration.Get<AppSettings>() ?? new AppSettings();
