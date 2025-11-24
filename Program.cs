@@ -8,7 +8,7 @@ var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
     .Build();
 
-var settings = configuration.Get<AppSettings>() ?? new AppSettings();
+var settings = AppSettingsMapper.Map(configuration.Get<AppSettingsDto>() ?? new AppSettingsDto());
 var deletionExtensions = FileUtilities
     .NormalizeExtensions(settings.DeletedExtensions)
     .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -16,7 +16,7 @@ var deletionExtensions = FileUtilities
 
 if (deletionExtensions.Length == 0)
 {
-    Console.WriteLine("WARNING: No file extensions configured for deletion.");
+    Console.WriteLine("WARNING: No file extensions configured for deletion in appsettings.json.");
 }
 else
 {
