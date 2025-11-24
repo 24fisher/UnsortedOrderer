@@ -4,7 +4,18 @@ public sealed class DocumentsCategory : FileCategory
 {
     private static readonly string[] DocumentExtensions =
     [
-        ".pdf", ".doc", ".docx", ".txt", ".rtf", ".odt", ".xlsx", ".xls", ".csv", ".ppt", ".pptx"
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".txt",
+        ".rtf",
+        ".odt",
+        ".xlsx",
+        ".xls",
+        ".csv",
+        ".ppt",
+        ".pptx",
+        ".ipynb"
     ];
 
     public DocumentsCategory()
