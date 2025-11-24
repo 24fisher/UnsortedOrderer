@@ -24,6 +24,25 @@ public static class FileUtilities
         return candidate;
     }
 
+    public static string GetUniqueDirectoryPath(string root, string directoryName)
+    {
+        var destinationPath = Path.Combine(root, directoryName);
+        if (!Directory.Exists(destinationPath) && !File.Exists(destinationPath))
+        {
+            return destinationPath;
+        }
+
+        var counter = 1;
+        string candidate;
+        do
+        {
+            candidate = Path.Combine(root, $"{directoryName}({counter})");
+            counter++;
+        } while (Directory.Exists(candidate) || File.Exists(candidate));
+
+        return candidate;
+    }
+
     public static string MoveFile(string sourcePath, string destinationDirectory)
     {
         Directory.CreateDirectory(destinationDirectory);

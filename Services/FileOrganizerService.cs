@@ -130,7 +130,7 @@ public sealed class FileOrganizerService
         var softRoot = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName);
         Directory.CreateDirectory(softRoot);
 
-        var destinationPath = GetUniqueDirectoryPath(softRoot, Path.GetFileName(directory) ?? "Distribution");
+        var destinationPath = FileUtilities.GetUniqueDirectoryPath(softRoot, Path.GetFileName(directory) ?? "Distribution");
         Directory.Move(directory, destinationPath);
     }
 
@@ -146,25 +146,6 @@ public sealed class FileOrganizerService
 
         var archiveDestination = _archiveService.HandleArchive(filePath, _settings.DestinationRoot, _settings.ArchiveFolderName, _settings.SoftFolderName);
         RecordMovedFile(archiveDestination, categoryName);
-    }
-
-    private static string GetUniqueDirectoryPath(string root, string directoryName)
-    {
-        var destinationPath = Path.Combine(root, directoryName);
-        if (!Directory.Exists(destinationPath))
-        {
-            return destinationPath;
-        }
-
-        var counter = 1;
-        string candidate;
-        do
-        {
-            candidate = Path.Combine(root, $"{directoryName}({counter})");
-            counter++;
-        } while (Directory.Exists(candidate));
-
-        return candidate;
     }
 
     private void CleanEmptyDirectories(string root)
