@@ -4,7 +4,22 @@ public sealed class ThreeDModelsCategory : FileCategory
 {
     private static readonly string[] ModelExtensions =
     [
-        ".obj", ".fbx", ".stl", ".3ds", ".dae", ".ply", ".blend", ".gltf", ".glb", ".usdz", ".step", ".stp", ".iges", ".igs"
+        ".obj",
+        ".fbx",
+        ".stl",
+        ".3ds",
+        ".dae",
+        ".ply",
+        ".blend",
+        ".gltf",
+        ".glb",
+        ".usdz",
+        ".step",
+        ".stp",
+        ".iges",
+        ".igs",
+        ".3mf",
+        ".scad"
     ];
 
     public ThreeDModelsCategory()
