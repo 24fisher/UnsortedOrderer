@@ -16,12 +16,16 @@ Console.WriteLine($"  DestinationRoot: {settings.DestinationRoot}");
 Console.WriteLine($"  SoftFolderName: {settings.SoftFolderName}");
 Console.WriteLine($"  ArchiveFolderName: {settings.ArchiveFolderName}");
 Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
+Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
+Console.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
 Console.WriteLine();
 Console.WriteLine("Starting organization...");
 
 var categories = new IFileCategory[]
 {
     new ImagesCategory(settings.ImagesFolderName),
+    new MusicCategory(settings.MusicFolderName),
+    new MusicalInstrumentsCategory(settings.MusicalInstrumentsFolderName),
     new DocumentsCategory(),
     new VideosCategory(),
     new ThreeDModelsCategory(),
