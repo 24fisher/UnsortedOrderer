@@ -30,6 +30,7 @@ Console.WriteLine($"  DestinationRoot: {settings.DestinationRoot}");
 Console.WriteLine($"  SoftFolderName: {settings.SoftFolderName}");
 Console.WriteLine($"  ArchiveFolderName: {settings.ArchiveFolderName}");
 Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
+Console.WriteLine($"  PhotosFolderName: {settings.PhotosFolderName}");
 Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
 Console.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
 Console.WriteLine($"  FirmwareFolderName: {settings.FirmwareFolderName}");
@@ -39,6 +40,7 @@ Console.WriteLine("Starting organization...");
 
 var categories = new IFileCategory[]
 {
+    new PhotosCategory(settings.PhotosFolderName),
     new ImagesCategory(settings.ImagesFolderName),
     new MusicCategory(settings.MusicFolderName),
     new MusicalInstrumentsCategory(settings.MusicalInstrumentsFolderName),
