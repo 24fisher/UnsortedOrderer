@@ -11,6 +11,15 @@ var configuration = new ConfigurationBuilder()
 
 var settings = configuration.Get<AppSettings>() ?? new AppSettings();
 
+Console.WriteLine("Loaded settings:");
+Console.WriteLine($"  SourceDirectory: {settings.SourceDirectory}");
+Console.WriteLine($"  DestinationRoot: {settings.DestinationRoot}");
+Console.WriteLine($"  SoftFolderName: {settings.SoftFolderName}");
+Console.WriteLine($"  ArchiveFolderName: {settings.ArchiveFolderName}");
+Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
+Console.WriteLine();
+Console.WriteLine("Starting organization...");
+
 var categories = new IFileCategory[]
 {
     new ImagesCategory(settings.ImagesFolderName),
