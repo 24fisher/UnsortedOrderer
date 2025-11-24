@@ -36,7 +36,7 @@ var categories = new IFileCategory[]
 
 var organizer = new FileOrganizerService(
     settings,
-    new DistributionDetector(),
+    new SoftwareDistributivesDetector(),
     new ArchiveService(),
     new PhotoService(),
     categories);

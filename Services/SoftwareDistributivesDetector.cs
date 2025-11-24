@@ -7,7 +7,7 @@ public interface IDistributionDetector
     bool IsDistributionDirectory(string path);
 }
 
-public sealed class DistributionDetector : IDistributionDetector
+public sealed class SoftwareDistributivesDetector : IDistributionDetector
 {
     private static readonly string[] InstallerExtensions = [
         ".exe", ".msi", ".msix", ".apk", ".dmg", ".pkg", ".deb", ".rpm", ".appimage", ".iso"
