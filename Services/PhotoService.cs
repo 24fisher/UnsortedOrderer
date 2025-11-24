@@ -2,13 +2,6 @@ using System.Drawing;
 
 namespace UnsortedOrderer.Services;
 
-public interface IPhotoService
-{
-    bool IsPhoto(string filePath);
-
-    string MovePhoto(string filePath, string destinationRoot, string photosFolderName);
-}
-
 public sealed class PhotoService : IPhotoService
 {
     private const int SmallImageMaxDimension = 512;
