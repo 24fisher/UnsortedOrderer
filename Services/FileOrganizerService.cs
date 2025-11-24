@@ -6,10 +6,10 @@ namespace UnsortedOrderer.Services;
 public sealed class FileOrganizerService
 {
     private readonly AppSettings _settings;
-    private readonly IDistributionDetector _distributionDetector;
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
     private readonly UnknownCategory _unknownCategory;
     private static readonly string[] DocumentImageKeywords = new[]
@@ -42,16 +42,15 @@ public sealed class FileOrganizerService
 
     public FileOrganizerService(
         AppSettings settings,
-        IDistributionDetector distributionDetector,
         IArchiveService archiveService,
         IPhotoService photoService,
         IEnumerable<IFileCategory> categories)
     {
         _settings = settings;
-        _distributionDetector = distributionDetector;
         _archiveService = archiveService;
         _photoService = photoService;
         _categories = categories.ToArray();
+        _nonSplittableCategories = _categories.OfType<INonSplittableDirectoryCategory>().ToArray();
         _imageCategories = _categories.OfType<ImageCategoryBase>().ToArray();
         _deletedExtensions = FileUtilities
             .NormalizeExtensions(settings.DeletedExtensions)
@@ -99,9 +98,12 @@ public sealed class FileOrganizerService
 
         foreach (var subDirectory in Directory.GetDirectories(directory))
         {
-            if (_distributionDetector.IsDistributionDirectory(subDirectory))
+            var nonSplittableCategory = _nonSplittableCategories
+                .FirstOrDefault(category => category.IsNonSplittableDirectory(subDirectory));
+
+            if (nonSplittableCategory is not null)
             {
-                MoveDistributionDirectory(subDirectory);
+                MoveNonSplittableDirectory(subDirectory, nonSplittableCategory);
                 continue;
             }
 
@@ -148,15 +150,11 @@ public sealed class FileOrganizerService
             case ArchivesCategory:
                 HandleArchiveFile(filePath, category.FolderName);
                 break;
-            case SoftCategory:
-                var softDestinationDirectory = GetDistributionDestinationDirectory(
-                    Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName),
-                    filePath);
-                var softDestination = FileUtilities.MoveFile(filePath, softDestinationDirectory);
-                RecordMovedFile(softDestination, category.FolderName);
-                break;
             default:
-                var destination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, category.FolderName));
+                var destinationDirectory = category is INonSplittableDirectoryCategory nonSplittableCategory
+                    ? nonSplittableCategory.GetFileDestination(_settings.DestinationRoot, filePath)
+                    : Path.Combine(_settings.DestinationRoot, category.FolderName);
+                var destination = FileUtilities.MoveFile(filePath, destinationDirectory);
                 RecordMovedFile(destination, category.FolderName);
                 break;
         }
@@ -208,12 +206,9 @@ public sealed class FileOrganizerService
         return _categories.FirstOrDefault(c => c.Matches(extension));
     }
 
-    private void MoveDistributionDirectory(string directory)
+    private void MoveNonSplittableDirectory(string directory, INonSplittableDirectoryCategory category)
     {
-        var softRoot = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName);
-        Directory.CreateDirectory(softRoot);
-
-        var destinationPath = FileUtilities.GetUniqueDirectoryPath(softRoot, Path.GetFileName(directory) ?? "Distribution");
+        var destinationPath = category.GetDirectoryDestination(_settings.DestinationRoot, directory);
         Directory.Move(directory, destinationPath);
     }
 
@@ -271,14 +266,6 @@ public sealed class FileOrganizerService
 
         var matchedExtension = Path.GetExtension(matchingFile).ToLowerInvariant();
         return _categories.FirstOrDefault(c => c.Matches(matchedExtension));
-    }
-
-    private static string GetDistributionDestinationDirectory(string categoryRoot, string filePath)
-    {
-        var programName = DistributionFolderHelper.TryGetProgramFolderName(filePath);
-        return programName is null
-            ? categoryRoot
-            : Path.Combine(categoryRoot, programName);
     }
 
     private void CleanEmptyDirectories(string root)
