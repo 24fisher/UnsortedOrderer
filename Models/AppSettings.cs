@@ -26,5 +26,5 @@ public sealed class AppSettings
 
     public string UnknownFolderName { get; set; } = "_Unknown";
 
-    public string[] DeletedExtensions { get; set; } = new[] { ".lnk", ".torrent", ".tmp" };
+    public string[] DeletedExtensions { get; set; } = Array.Empty<string>();
 }
