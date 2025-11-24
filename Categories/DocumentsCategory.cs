@@ -15,7 +15,8 @@ public sealed class DocumentsCategory : FileCategory
         ".csv",
         ".ppt",
         ".pptx",
-        ".ipynb"
+        ".ipynb",
+        ".names"
     ];
 
     public DocumentsCategory()
