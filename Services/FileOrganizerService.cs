@@ -36,6 +36,7 @@ public sealed class FileOrganizerService
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _deletedFilesByExtension = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedExtensions;
+    private readonly List<NonSplittableDirectoryRecord> _movedNonSplittableDirectories = new();
     private int _totalMovedFiles;
     private int _totalUnknownFiles;
     private int _totalDeletedFiles;
@@ -209,7 +210,10 @@ public sealed class FileOrganizerService
     private void MoveNonSplittableDirectory(string directory, INonSplittableDirectoryCategory category)
     {
         var destinationPath = category.GetDirectoryDestination(_settings.DestinationRoot, directory);
+        var fileCount = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Count();
         Directory.Move(directory, destinationPath);
+
+        RecordMovedNonSplittableDirectory(category, destinationPath, fileCount);
     }
 
     private void HandleArchiveFile(string filePath, string categoryName)
@@ -288,17 +292,33 @@ public sealed class FileOrganizerService
 
     private void RecordMovedFile(string destinationPath, string category)
     {
-        _totalMovedFiles++;
+        RecordMovedFiles(1, category);
+
+        Console.WriteLine($"Moved to '{destinationPath}' (category: {category}).");
+    }
+
+    private void RecordMovedFiles(int count, string category)
+    {
+        _totalMovedFiles += count;
         if (_movedFilesByCategory.ContainsKey(category))
         {
-            _movedFilesByCategory[category]++;
+            _movedFilesByCategory[category] += count;
         }
         else
         {
-            _movedFilesByCategory[category] = 1;
+            _movedFilesByCategory[category] = count;
         }
+    }
 
-        Console.WriteLine($"Moved to '{destinationPath}' (category: {category}).");
+    private void RecordMovedNonSplittableDirectory(
+        INonSplittableDirectoryCategory category,
+        string destinationPath,
+        int fileCount)
+    {
+        _movedNonSplittableDirectories.Add(new NonSplittableDirectoryRecord(destinationPath, category.FolderName, fileCount));
+        RecordMovedFiles(fileCount, category.FolderName);
+
+        Console.WriteLine($"Moved directory '{destinationPath}' (category: {category.FolderName}, files: {fileCount}).");
     }
 
     private void RecordDeletedDirectory(string directory)
@@ -423,6 +443,8 @@ public sealed class FileOrganizerService
 
         PrintDeletedFilesByExtension();
 
+        PrintNonSplittableDirectories();
+
         if (_deletedDirectories.Count == 0)
         {
             Console.WriteLine("Deleted directories: none");
@@ -469,4 +491,22 @@ public sealed class FileOrganizerService
         Console.WriteLine("Source directory fully processed. No files remain to organize.");
         Console.WriteLine("====================");
     }
+
+    private void PrintNonSplittableDirectories()
+    {
+        if (_movedNonSplittableDirectories.Count == 0)
+        {
+            Console.WriteLine("Non-splittable directories moved: none");
+            return;
+        }
+
+        Console.WriteLine("Non-splittable directories moved:");
+        foreach (var record in _movedNonSplittableDirectories
+                     .OrderBy(r => r.Destination, StringComparer.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"  {record.Destination} ({record.FileCount} files)");
+        }
+    }
+
+    private sealed record NonSplittableDirectoryRecord(string Destination, string Category, int FileCount);
 }
