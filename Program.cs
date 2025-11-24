@@ -31,7 +31,8 @@ var categories = new IFileCategory[]
     new ThreeDModelsCategory(),
     new ArchivesCategory(settings.ArchiveFolderName),
     new CertificatesCategory(),
-    new SoftCategory(settings.SoftFolderName)
+    new SoftCategory(settings.SoftFolderName),
+    new UnknownCategory(settings.UnknownFolderName)
 };
 
 var organizer = new FileOrganizerService(
