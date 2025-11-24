@@ -18,6 +18,8 @@ public sealed class AppSettings
 
     public string MusicalInstrumentsFolderName { get; set; } = "Instruments";
 
+    public string EBooksFolderName { get; set; } = "EBooks";
+
     public string FirmwareFolderName { get; set; } = "Firmware";
 
     public string MetadataFolderName { get; set; } = "Metadata";

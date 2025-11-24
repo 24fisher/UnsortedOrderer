@@ -33,6 +33,7 @@ Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
 Console.WriteLine($"  PhotosFolderName: {settings.PhotosFolderName}");
 Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
 Console.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
+Console.WriteLine($"  EBooksFolderName: {settings.EBooksFolderName}");
 Console.WriteLine($"  FirmwareFolderName: {settings.FirmwareFolderName}");
 Console.WriteLine($"  MetadataFolderName: {settings.MetadataFolderName}");
 Console.WriteLine();
@@ -44,6 +45,7 @@ var categories = new IFileCategory[]
     new ImagesCategory(settings.ImagesFolderName),
     new MusicCategory(settings.MusicFolderName),
     new MusicalInstrumentsCategory(settings.MusicalInstrumentsFolderName),
+    new EBooksCategory(settings.EBooksFolderName),
     new DocumentsCategory(),
     new VideosCategory(),
     new ThreeDModelsCategory(),
