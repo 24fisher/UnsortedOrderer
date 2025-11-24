@@ -11,4 +11,8 @@ public sealed class AppSettings
     public string ArchiveFolderName { get; set; } = "Archives";
 
     public string ImagesFolderName { get; set; } = "Images";
+
+    public string MusicFolderName { get; set; } = "Music";
+
+    public string MusicalInstrumentsFolderName { get; set; } = "Instruments";
 }

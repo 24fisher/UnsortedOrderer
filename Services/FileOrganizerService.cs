@@ -26,6 +26,11 @@ public sealed class FileOrganizerService
         _archiveService = archiveService;
         _photoService = photoService;
         _categories = categories.ToArray();
+
+        foreach (var category in _categories)
+        {
+            _movedFilesByCategory[category.FolderName] = 0;
+        }
     }
 
     public void Organize()
@@ -88,6 +93,7 @@ public sealed class FileOrganizerService
         var category = _categories.FirstOrDefault(c => c.Matches(extension));
         if (category is null)
         {
+            Console.WriteLine($"Unknown file type encountered: '{filePath}'.");
             return;
         }
 
@@ -200,9 +206,12 @@ public sealed class FileOrganizerService
         Console.WriteLine("Organization summary:");
         Console.WriteLine($"Total files moved: {_totalMovedFiles}");
 
-        foreach (var category in _movedFilesByCategory.OrderBy(c => c.Key))
+        foreach (var category in _categories.OrderBy(c => c.FolderName, StringComparer.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"  {category.Key}: {category.Value}");
+            var movedCount = _movedFilesByCategory.TryGetValue(category.FolderName, out var count)
+                ? count
+                : 0;
+            Console.WriteLine($"  {category.FolderName}: {movedCount}");
         }
 
         if (_deletedDirectories.Count == 0)
