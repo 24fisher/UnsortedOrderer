@@ -11,7 +11,25 @@ public sealed class FileOrganizerService
     private readonly IPhotoService _photoService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly UnknownCategory _unknownCategory;
-    private static readonly string[] DocumentImageKeywords = new[] { "скан", "паспорт", "свидетельство", "документ" };
+    private static readonly string[] DocumentImageKeywords = new[]
+    {
+        "скан",
+        "паспорт",
+        "свидетельство",
+        "документ",
+        "анкета",
+        "виза",
+        "заявление",
+        "удостоверение",
+        "справка",
+        "сертификат",
+        "снилс",
+        "водительское",
+        "загран",
+        "регистрация",
+        "патент",
+        "полис"
+    };
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
