@@ -14,6 +14,7 @@ Console.WriteLine("Loaded settings:");
 Console.WriteLine($"  SourceDirectory: {settings.SourceDirectory}");
 Console.WriteLine($"  DestinationRoot: {settings.DestinationRoot}");
 Console.WriteLine($"  SoftFolderName: {settings.SoftFolderName}");
+Console.WriteLine($"  DriversFolderName: {settings.DriversFolderName}");
 Console.WriteLine($"  ArchiveFolderName: {settings.ArchiveFolderName}");
 Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
 Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
@@ -33,6 +34,7 @@ var categories = new IFileCategory[]
     new ArchivesCategory(settings.ArchiveFolderName),
     new CertificatesCategory(),
     new FirmwareCategory(settings.FirmwareFolderName),
+    new DriversCategory(settings.DriversFolderName),
     new SoftCategory(settings.SoftFolderName),
     new UnknownCategory(settings.UnknownFolderName)
 };

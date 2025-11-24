@@ -12,6 +12,7 @@ public sealed class FileOrganizerService
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly UnknownCategory _unknownCategory;
     private static readonly string[] DocumentImageKeywords = new[] { "скан", "паспорт", "свидетельство", "документ" };
+    private static readonly string[] DriverKeywords = new[] { "driver" };
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
@@ -102,7 +103,8 @@ public sealed class FileOrganizerService
             return;
         }
 
-        var category = TryGetSpecialCategory(filePath, extension)
+        var category = TryGetDriverCategory(filePath, extension)
+            ?? TryGetSpecialCategory(filePath, extension)
             ?? _categories.FirstOrDefault(c => c.Matches(extension));
         if (category is null)
         {
@@ -120,12 +122,12 @@ public sealed class FileOrganizerService
             case ArchivesCategory:
                 HandleArchiveFile(filePath, category.FolderName);
                 break;
-            case SoftCategory:
-                var softDestinationDirectory = GetDistributionDestinationDirectory(
-                    Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName),
+            case SoftCategory or DriversCategory:
+                var softwareDestinationDirectory = GetDistributionDestinationDirectory(
+                    Path.Combine(_settings.DestinationRoot, category.FolderName),
                     filePath);
-                var softDestination = FileUtilities.MoveFile(filePath, softDestinationDirectory);
-                RecordMovedFile(softDestination, category.FolderName);
+                var softwareDestination = FileUtilities.MoveFile(filePath, softwareDestinationDirectory);
+                RecordMovedFile(softwareDestination, category.FolderName);
                 break;
             default:
                 var destination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, category.FolderName));
@@ -161,9 +163,42 @@ public sealed class FileOrganizerService
             : null;
     }
 
+    private IFileCategory? TryGetDriverCategory(string filePath, string extension)
+    {
+        var driversCategory = _categories.OfType<DriversCategory>().FirstOrDefault();
+        if (driversCategory is null)
+        {
+            return null;
+        }
+
+        if (!driversCategory.Matches(extension) && !IsArchiveExtension(extension))
+        {
+            return null;
+        }
+
+        var fileName = Path.GetFileNameWithoutExtension(filePath);
+        if (ContainsDriverKeyword(fileName))
+        {
+            return driversCategory;
+        }
+
+        var parentDirectory = Path.GetDirectoryName(filePath);
+        var directoryName = string.IsNullOrWhiteSpace(parentDirectory)
+            ? string.Empty
+            : Path.GetFileName(parentDirectory);
+
+        return ContainsDriverKeyword(directoryName)
+            ? driversCategory
+            : null;
+    }
+
     private void MoveDistributionDirectory(string directory)
     {
-        var softRoot = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName);
+        var targetFolderName = ContainsDriverKeyword(Path.GetFileName(directory))
+            ? _settings.DriversFolderName
+            : _settings.SoftFolderName;
+
+        var softRoot = Path.Combine(_settings.DestinationRoot, targetFolderName);
         Directory.CreateDirectory(softRoot);
 
         var destinationPath = FileUtilities.GetUniqueDirectoryPath(softRoot, Path.GetFileName(directory) ?? "Distribution");
@@ -181,6 +216,9 @@ public sealed class FileOrganizerService
             {
                 SoftCategory => GetDistributionDestinationDirectory(
                     Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName),
+                    filePath),
+                DriversCategory => GetDistributionDestinationDirectory(
+                    Path.Combine(_settings.DestinationRoot, _settings.DriversFolderName),
                     filePath),
                 ArchivesCategory => GetDistributionDestinationDirectory(
                     Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName),
@@ -203,11 +241,15 @@ public sealed class FileOrganizerService
     private void RemoveExistingDistributionDirectory(string archivePath)
     {
         var archiveName = Path.GetFileNameWithoutExtension(archivePath) ?? string.Empty;
-        var potentialDistributionDirectory = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName, archiveName);
-        if (Directory.Exists(potentialDistributionDirectory))
+
+        foreach (var root in GetDistributionRoots(archiveName))
         {
-            RecordDeletedDirectory(potentialDistributionDirectory);
-            Directory.Delete(potentialDistributionDirectory, recursive: true);
+            var potentialDistributionDirectory = Path.Combine(root, archiveName);
+            if (Directory.Exists(potentialDistributionDirectory))
+            {
+                RecordDeletedDirectory(potentialDistributionDirectory);
+                Directory.Delete(potentialDistributionDirectory, recursive: true);
+            }
         }
     }
 
@@ -235,7 +277,18 @@ public sealed class FileOrganizerService
         }
 
         var matchedExtension = Path.GetExtension(matchingFile).ToLowerInvariant();
-        return _categories.FirstOrDefault(c => c.Matches(matchedExtension));
+        return TryGetDriverCategory(matchingFile, matchedExtension)
+            ?? _categories.FirstOrDefault(c => c.Matches(matchedExtension));
+    }
+
+    private IEnumerable<string> GetDistributionRoots(string archiveName)
+    {
+        yield return Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName);
+
+        if (_categories.OfType<DriversCategory>().Any() && ContainsDriverKeyword(archiveName))
+        {
+            yield return Path.Combine(_settings.DestinationRoot, _settings.DriversFolderName);
+        }
     }
 
     private static string GetDistributionDestinationDirectory(string categoryRoot, string filePath)
@@ -330,6 +383,23 @@ public sealed class FileOrganizerService
         }
     }
 
+    private static bool ContainsDriverKeyword(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var normalized = value.ToLowerInvariant();
+        return DriverKeywords.Any(keyword => normalized.Contains(keyword));
+    }
+
+    private bool IsArchiveExtension(string extension)
+    {
+        var archivesCategory = _categories.OfType<ArchivesCategory>().FirstOrDefault();
+        return archivesCategory is not null && archivesCategory.Matches(extension);
+    }
+
     private void ValidateCategoryExtensions()
     {
         var extensionToCategories = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
@@ -349,7 +419,7 @@ public sealed class FileOrganizerService
         }
 
         var overlaps = extensionToCategories
-            .Where(kvp => kvp.Value.Count > 1)
+            .Where(kvp => kvp.Value.Count > 1 && !IsOverlapAllowed(kvp.Value))
             .ToArray();
 
         if (overlaps.Length == 0)
@@ -361,6 +431,13 @@ public sealed class FileOrganizerService
             .Select(kvp => $"{kvp.Key}: {string.Join(", ", kvp.Value.OrderBy(v => v, StringComparer.OrdinalIgnoreCase))}");
 
         throw new InvalidOperationException($"Category extensions overlap: {string.Join("; ", overlapDetails)}");
+    }
+
+    private static bool IsOverlapAllowed(HashSet<string> categories)
+    {
+        return categories.Count == 2
+            && categories.Contains("Soft")
+            && categories.Contains("Drivers");
     }
 
     private void PrintStatistics()

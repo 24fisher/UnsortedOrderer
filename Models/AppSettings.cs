@@ -8,6 +8,8 @@ public sealed class AppSettings
 
     public string SoftFolderName { get; set; } = "Soft";
 
+    public string DriversFolderName { get; set; } = "Drivers";
+
     public string ArchiveFolderName { get; set; } = "Archives";
 
     public string ImagesFolderName { get; set; } = "Images";
