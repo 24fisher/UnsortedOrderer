@@ -11,6 +11,7 @@ public sealed class FileOrganizerService
     private readonly IPhotoService _photoService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly UnknownCategory _unknownCategory;
+    private static readonly string[] DocumentImageKeywords = new[] { "скан", "паспорт", "свидетельство", "документ" };
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
@@ -101,7 +102,8 @@ public sealed class FileOrganizerService
             return;
         }
 
-        var category = _categories.FirstOrDefault(c => c.Matches(extension));
+        var category = TryGetSpecialCategory(filePath, extension)
+            ?? _categories.FirstOrDefault(c => c.Matches(extension));
         if (category is null)
         {
             RecordUnknownFile(extension);
@@ -130,6 +132,33 @@ public sealed class FileOrganizerService
                 RecordMovedFile(destination, category.FolderName);
                 break;
         }
+    }
+
+    private IFileCategory? TryGetSpecialCategory(string filePath, string extension)
+    {
+        var imagesCategory = _categories.OfType<ImagesCategory>().FirstOrDefault();
+        var documentsCategory = _categories.OfType<DocumentsCategory>().FirstOrDefault();
+
+        if (imagesCategory is null || documentsCategory is null)
+        {
+            return null;
+        }
+
+        if (!imagesCategory.Matches(extension))
+        {
+            return null;
+        }
+
+        var fileName = Path.GetFileNameWithoutExtension(filePath);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return null;
+        }
+
+        var lowerInvariantName = fileName.ToLowerInvariant();
+        return DocumentImageKeywords.Any(keyword => lowerInvariantName.Contains(keyword))
+            ? documentsCategory
+            : null;
     }
 
     private void MoveDistributionDirectory(string directory)
