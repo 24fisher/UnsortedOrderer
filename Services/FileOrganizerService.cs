@@ -115,7 +115,10 @@ public sealed class FileOrganizerService
                 HandleArchiveFile(filePath, category.FolderName);
                 break;
             case SoftCategory:
-                var softDestination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName));
+                var softDestinationDirectory = GetDistributionDestinationDirectory(
+                    Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName),
+                    filePath);
+                var softDestination = FileUtilities.MoveFile(filePath, softDestinationDirectory);
                 RecordMovedFile(softDestination, category.FolderName);
                 break;
             default:
@@ -144,8 +147,19 @@ public sealed class FileOrganizerService
             Directory.Delete(potentialDistributionDirectory, recursive: true);
         }
 
-        var archiveDestination = _archiveService.HandleArchive(filePath, _settings.DestinationRoot, _settings.ArchiveFolderName, _settings.SoftFolderName);
+        var archiveDestinationDirectory = GetDistributionDestinationDirectory(
+            Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName),
+            filePath);
+        var archiveDestination = _archiveService.HandleArchive(filePath, archiveDestinationDirectory);
         RecordMovedFile(archiveDestination, categoryName);
+    }
+
+    private static string GetDistributionDestinationDirectory(string categoryRoot, string filePath)
+    {
+        var programName = DistributionFolderHelper.TryGetProgramFolderName(filePath);
+        return programName is null
+            ? categoryRoot
+            : Path.Combine(categoryRoot, programName);
     }
 
     private void CleanEmptyDirectories(string root)

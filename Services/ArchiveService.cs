@@ -2,19 +2,16 @@ namespace UnsortedOrderer.Services;
 
 public interface IArchiveService
 {
-    string HandleArchive(string archivePath, string destinationRoot, string archiveFolderName, string softFolderName);
+    string HandleArchive(string archivePath, string destinationDirectory);
 }
 
 public sealed class ArchiveService : IArchiveService
 {
-    public string HandleArchive(string archivePath, string destinationRoot, string archiveFolderName, string softFolderName)
+    public string HandleArchive(string archivePath, string destinationDirectory)
     {
-        var archiveName = Path.GetFileNameWithoutExtension(archivePath) ?? string.Empty;
+        Directory.CreateDirectory(destinationDirectory);
 
-        var archiveDestinationDirectory = Path.Combine(destinationRoot, archiveFolderName);
-        Directory.CreateDirectory(archiveDestinationDirectory);
-
-        var destinationPath = Path.Combine(archiveDestinationDirectory, Path.GetFileName(archivePath));
+        var destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(archivePath));
         var finalPath = FileUtilities.GetUniqueFilePath(destinationPath);
         File.Move(archivePath, finalPath);
 
