@@ -8,7 +8,7 @@ public sealed class SoftCategory : FileCategory, INonSplittableDirectoryCategory
 
     private static readonly SoftwareDistributivesDetector DistributionDetector = new();
     private static readonly string[] DiskImageExtensions =
-    [
+    {
         ".iso",
         ".cso",
         ".dmg",
@@ -20,10 +20,11 @@ public sealed class SoftCategory : FileCategory, INonSplittableDirectoryCategory
         ".isz",
         ".vhd",
         ".vhdx"
-    ];
+    };
 
     private static readonly string[] SoftExtensions =
-        [
+        new[]
+        {
             ".exe",
             ".msi",
             ".msix",
@@ -32,7 +33,7 @@ public sealed class SoftCategory : FileCategory, INonSplittableDirectoryCategory
             ".deb",
             ".rpm",
             ".appimage"
-        ]
+        }
         .Concat(DiskImageExtensions)
         .ToArray();
 
