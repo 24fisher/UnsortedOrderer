@@ -10,6 +10,9 @@ public sealed class FileOrganizerService
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
+    private int _totalMovedFiles;
 
     public FileOrganizerService(
         AppSettings settings,
@@ -34,12 +37,21 @@ public sealed class FileOrganizerService
         }
 
         Directory.CreateDirectory(_settings.DestinationRoot);
+        Console.WriteLine($"Ensured destination root exists at '{_settings.DestinationRoot}'.");
+
+        Console.WriteLine("Press any key to start file scan...");
+        Console.ReadKey(intercept: true);
+
         ProcessDirectory(_settings.SourceDirectory);
         CleanEmptyDirectories(_settings.SourceDirectory);
+
+        PrintStatistics();
     }
 
     private void ProcessDirectory(string directory)
     {
+        Console.WriteLine($"Scanning directory: {directory}");
+
         foreach (var file in Directory.GetFiles(directory))
         {
             ProcessFile(file);
@@ -57,6 +69,7 @@ public sealed class FileOrganizerService
 
             if (IsDirectoryEmpty(subDirectory))
             {
+                RecordDeletedDirectory(subDirectory);
                 Directory.Delete(subDirectory, recursive: false);
             }
         }
@@ -81,16 +94,19 @@ public sealed class FileOrganizerService
         switch (category)
         {
             case ImagesCategory:
-                _photoService.MovePhoto(filePath, _settings.DestinationRoot, _settings.ImagesFolderName);
+                var photoDestination = _photoService.MovePhoto(filePath, _settings.DestinationRoot, _settings.ImagesFolderName);
+                RecordMovedFile(photoDestination, category.FolderName);
                 break;
             case ArchivesCategory:
-                _archiveService.HandleArchive(filePath, _settings.DestinationRoot, _settings.ArchiveFolderName, _settings.SoftFolderName);
+                HandleArchiveFile(filePath, category.FolderName);
                 break;
             case SoftCategory:
-                FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName));
+                var softDestination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName));
+                RecordMovedFile(softDestination, category.FolderName);
                 break;
             default:
-                FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, category.FolderName));
+                var destination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, category.FolderName));
+                RecordMovedFile(destination, category.FolderName);
                 break;
         }
     }
@@ -102,6 +118,20 @@ public sealed class FileOrganizerService
 
         var destinationPath = GetUniqueDirectoryPath(softRoot, Path.GetFileName(directory) ?? "Distribution");
         Directory.Move(directory, destinationPath);
+    }
+
+    private void HandleArchiveFile(string filePath, string categoryName)
+    {
+        var archiveName = Path.GetFileNameWithoutExtension(filePath) ?? string.Empty;
+        var potentialDistributionDirectory = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName, archiveName);
+        if (Directory.Exists(potentialDistributionDirectory))
+        {
+            RecordDeletedDirectory(potentialDistributionDirectory);
+            Directory.Delete(potentialDistributionDirectory, recursive: true);
+        }
+
+        var archiveDestination = _archiveService.HandleArchive(filePath, _settings.DestinationRoot, _settings.ArchiveFolderName, _settings.SoftFolderName);
+        RecordMovedFile(archiveDestination, categoryName);
     }
 
     private static string GetUniqueDirectoryPath(string root, string directoryName)
@@ -130,6 +160,7 @@ public sealed class FileOrganizerService
             CleanEmptyDirectories(directory);
             if (IsDirectoryEmpty(directory))
             {
+                RecordDeletedDirectory(directory);
                 Directory.Delete(directory, recursive: false);
             }
         }
@@ -138,5 +169,52 @@ public sealed class FileOrganizerService
     private static bool IsDirectoryEmpty(string path)
     {
         return !Directory.EnumerateFileSystemEntries(path).Any();
+    }
+
+    private void RecordMovedFile(string destinationPath, string category)
+    {
+        _totalMovedFiles++;
+        if (_movedFilesByCategory.ContainsKey(category))
+        {
+            _movedFilesByCategory[category]++;
+        }
+        else
+        {
+            _movedFilesByCategory[category] = 1;
+        }
+
+        Console.WriteLine($"Moved to '{destinationPath}' (category: {category}).");
+    }
+
+    private void RecordDeletedDirectory(string directory)
+    {
+        if (_deletedDirectories.Add(directory))
+        {
+            Console.WriteLine($"Deleted directory: {directory}");
+        }
+    }
+
+    private void PrintStatistics()
+    {
+        Console.WriteLine();
+        Console.WriteLine("Organization summary:");
+        Console.WriteLine($"Total files moved: {_totalMovedFiles}");
+
+        foreach (var category in _movedFilesByCategory.OrderBy(c => c.Key))
+        {
+            Console.WriteLine($"  {category.Key}: {category.Value}");
+        }
+
+        if (_deletedDirectories.Count == 0)
+        {
+            Console.WriteLine("Deleted directories: none");
+            return;
+        }
+
+        Console.WriteLine("Deleted directories:");
+        foreach (var directory in _deletedDirectories.OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"  {directory}");
+        }
     }
 }
