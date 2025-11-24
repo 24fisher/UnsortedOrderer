@@ -12,7 +12,9 @@ public sealed class FileOrganizerService
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
     private int _totalMovedFiles;
+    private int _totalUnknownFiles;
 
     public FileOrganizerService(
         AppSettings settings,
@@ -26,6 +28,8 @@ public sealed class FileOrganizerService
         _archiveService = archiveService;
         _photoService = photoService;
         _categories = categories.ToArray();
+
+        ValidateCategoryExtensions();
 
         foreach (var category in _categories)
         {
@@ -93,6 +97,7 @@ public sealed class FileOrganizerService
         var category = _categories.FirstOrDefault(c => c.Matches(extension));
         if (category is null)
         {
+            RecordUnknownFile(extension);
             Console.WriteLine($"Unknown file type encountered: '{filePath}'.");
             return;
         }
@@ -200,6 +205,54 @@ public sealed class FileOrganizerService
         }
     }
 
+    private void RecordUnknownFile(string extension)
+    {
+        _totalUnknownFiles++;
+        var key = string.IsNullOrWhiteSpace(extension) ? "(no extension)" : extension;
+
+        if (_unknownExtensions.ContainsKey(key))
+        {
+            _unknownExtensions[key]++;
+        }
+        else
+        {
+            _unknownExtensions[key] = 1;
+        }
+    }
+
+    private void ValidateCategoryExtensions()
+    {
+        var extensionToCategories = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var category in _categories)
+        {
+            foreach (var extension in category.Extensions)
+            {
+                if (!extensionToCategories.TryGetValue(extension, out var categorySet))
+                {
+                    categorySet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    extensionToCategories[extension] = categorySet;
+                }
+
+                categorySet.Add(category.Name);
+            }
+        }
+
+        var overlaps = extensionToCategories
+            .Where(kvp => kvp.Value.Count > 1)
+            .ToArray();
+
+        if (overlaps.Length == 0)
+        {
+            return;
+        }
+
+        var overlapDetails = overlaps
+            .Select(kvp => $"{kvp.Key}: {string.Join(", ", kvp.Value.OrderBy(v => v, StringComparer.OrdinalIgnoreCase))}");
+
+        throw new InvalidOperationException($"Category extensions overlap: {string.Join("; ", overlapDetails)}");
+    }
+
     private void PrintStatistics()
     {
         Console.WriteLine();
@@ -212,6 +265,19 @@ public sealed class FileOrganizerService
                 ? count
                 : 0;
             Console.WriteLine($"  {category.FolderName}: {movedCount}");
+        }
+
+        if (_unknownExtensions.Count == 0)
+        {
+            Console.WriteLine("Unknown file types: none");
+        }
+        else
+        {
+            Console.WriteLine($"Unknown file types encountered: {_totalUnknownFiles}");
+            foreach (var unknown in _unknownExtensions.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"  {unknown.Key}: {unknown.Value}");
+            }
         }
 
         if (_deletedDirectories.Count == 0)

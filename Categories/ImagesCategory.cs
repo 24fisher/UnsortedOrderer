@@ -4,7 +4,8 @@ public sealed class ImagesCategory : FileCategory
 {
     private static readonly string[] ImageExtensions =
     [
-        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".raw", ".cr2", ".cr3", ".nef", ".arw", ".orf", ".sr2"
+        ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".raw", ".cr2", ".cr3", ".nef", ".arw", ".orf", ".sr2",
+        ".dng", ".rw2", ".pef", ".raf", ".srw", ".k25"
     ];
 
     public ImagesCategory(string folderName)
