@@ -2,29 +2,59 @@ namespace UnsortedOrderer.Models;
 
 public sealed class AppSettings
 {
-    public string SourceDirectory { get; set; } = string.Empty;
+    public AppSettings(
+        string sourceDirectory,
+        string destinationRoot,
+        string softFolderName,
+        string archiveFolderName,
+        string imagesFolderName,
+        string photosFolderName,
+        string musicFolderName,
+        string musicalInstrumentsFolderName,
+        string eBooksFolderName,
+        string firmwareFolderName,
+        string metadataFolderName,
+        string unknownFolderName,
+        string[] deletedExtensions)
+    {
+        SourceDirectory = sourceDirectory;
+        DestinationRoot = destinationRoot;
+        SoftFolderName = softFolderName;
+        ArchiveFolderName = archiveFolderName;
+        ImagesFolderName = imagesFolderName;
+        PhotosFolderName = photosFolderName;
+        MusicFolderName = musicFolderName;
+        MusicalInstrumentsFolderName = musicalInstrumentsFolderName;
+        EBooksFolderName = eBooksFolderName;
+        FirmwareFolderName = firmwareFolderName;
+        MetadataFolderName = metadataFolderName;
+        UnknownFolderName = unknownFolderName;
+        DeletedExtensions = deletedExtensions;
+    }
 
-    public string DestinationRoot { get; set; } = string.Empty;
+    public string SourceDirectory { get; }
 
-    public string SoftFolderName { get; set; } = "Soft";
+    public string DestinationRoot { get; }
 
-    public string ArchiveFolderName { get; set; } = "Archives";
+    public string SoftFolderName { get; }
 
-    public string ImagesFolderName { get; set; } = "Images";
+    public string ArchiveFolderName { get; }
 
-    public string PhotosFolderName { get; set; } = "Photos";
+    public string ImagesFolderName { get; }
 
-    public string MusicFolderName { get; set; } = "Music";
+    public string PhotosFolderName { get; }
 
-    public string MusicalInstrumentsFolderName { get; set; } = "Instruments";
+    public string MusicFolderName { get; }
 
-    public string EBooksFolderName { get; set; } = "EBooks";
+    public string MusicalInstrumentsFolderName { get; }
 
-    public string FirmwareFolderName { get; set; } = "Firmware";
+    public string EBooksFolderName { get; }
 
-    public string MetadataFolderName { get; set; } = "Metadata";
+    public string FirmwareFolderName { get; }
 
-    public string UnknownFolderName { get; set; } = "_Unknown";
+    public string MetadataFolderName { get; }
 
-    public string[] DeletedExtensions { get; set; } = Array.Empty<string>();
+    public string UnknownFolderName { get; }
+
+    public string[] DeletedExtensions { get; }
 }
