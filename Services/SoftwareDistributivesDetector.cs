@@ -2,11 +2,6 @@ using System.Text.RegularExpressions;
 
 namespace UnsortedOrderer.Services;
 
-public interface IDistributionDetector
-{
-    bool IsDistributionDirectory(string path);
-}
-
 public sealed class SoftwareDistributivesDetector : IDistributionDetector
 {
     private static readonly string[] InstallerExtensions = [
