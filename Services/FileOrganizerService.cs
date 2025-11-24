@@ -10,6 +10,7 @@ public sealed class FileOrganizerService
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly UnknownCategory _unknownCategory;
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
@@ -30,6 +31,9 @@ public sealed class FileOrganizerService
         _archiveService = archiveService;
         _photoService = photoService;
         _categories = categories.ToArray();
+
+        _unknownCategory = _categories.OfType<UnknownCategory>().FirstOrDefault()
+            ?? throw new InvalidOperationException("Unknown category is missing.");
 
         ValidateCategoryExtensions();
 
@@ -101,7 +105,7 @@ public sealed class FileOrganizerService
         if (category is null)
         {
             RecordUnknownFile(extension);
-            Console.WriteLine($"Unknown file type encountered: '{filePath}'.");
+            MoveToUnknown(filePath, extension);
             return;
         }
 
@@ -216,6 +220,19 @@ public sealed class FileOrganizerService
         {
             _unknownExtensions[key] = 1;
         }
+    }
+
+    private void MoveToUnknown(string filePath, string extension)
+    {
+        var extensionFolderName = string.IsNullOrWhiteSpace(extension)
+            ? "no-extension"
+            : extension.TrimStart('.')
+                .Replace(Path.DirectorySeparatorChar, '-')
+                .Replace(Path.AltDirectorySeparatorChar, '-');
+
+        var unknownDirectory = Path.Combine(_settings.DestinationRoot, _unknownCategory.FolderName, extensionFolderName);
+        var destination = FileUtilities.MoveFile(filePath, unknownDirectory);
+        RecordMovedFile(destination, _unknownCategory.FolderName);
     }
 
     private void RecordDeletedUncategorizedFile(string extension)

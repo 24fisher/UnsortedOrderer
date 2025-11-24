@@ -15,4 +15,6 @@ public sealed class AppSettings
     public string MusicFolderName { get; set; } = "Music";
 
     public string MusicalInstrumentsFolderName { get; set; } = "Instruments";
+
+    public string UnknownFolderName { get; set; } = "_Unknown";
 }
