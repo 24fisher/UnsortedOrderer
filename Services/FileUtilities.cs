@@ -51,4 +51,25 @@ public static class FileUtilities
         File.Move(sourcePath, destinationPath);
         return destinationPath;
     }
+
+    public static IEnumerable<string> NormalizeExtensions(IEnumerable<string>? extensions)
+    {
+        if (extensions is null)
+        {
+            yield break;
+        }
+
+        foreach (var extension in extensions)
+        {
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                continue;
+            }
+
+            var trimmed = extension.Trim();
+            yield return trimmed.StartsWith('.')
+                ? trimmed.ToLowerInvariant()
+                : $".{trimmed.ToLowerInvariant()}";
+        }
+    }
 }

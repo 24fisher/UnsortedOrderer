@@ -9,6 +9,20 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 var settings = configuration.Get<AppSettings>() ?? new AppSettings();
+var deletionExtensions = FileUtilities
+    .NormalizeExtensions(settings.DeletedExtensions)
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+
+if (deletionExtensions.Length == 0)
+{
+    Console.WriteLine("WARNING: No file extensions configured for deletion.");
+}
+else
+{
+    Console.WriteLine("WARNING: Files with these extensions will be deleted: " + string.Join(", ", deletionExtensions));
+}
+Console.WriteLine();
 
 Console.WriteLine("Loaded settings:");
 Console.WriteLine($"  SourceDirectory: {settings.SourceDirectory}");
