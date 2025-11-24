@@ -224,25 +224,13 @@ public sealed class FileOrganizerService
         var matchingCategory = FindMatchingSiblingCategory(filePath);
         if (matchingCategory is not null)
         {
-            var matchingDestinationDirectory = matchingCategory switch
-            {
-                SoftCategory => GetDistributionDestinationDirectory(
-                    Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName),
-                    filePath),
-                ArchivesCategory => GetDistributionDestinationDirectory(
-                    Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName),
-                    filePath),
-                _ => Path.Combine(_settings.DestinationRoot, matchingCategory.FolderName)
-            };
-
+            var matchingDestinationDirectory = Path.Combine(_settings.DestinationRoot, matchingCategory.FolderName);
             var matchingArchiveDestination = _archiveService.HandleArchive(filePath, matchingDestinationDirectory);
             RecordMovedFile(matchingArchiveDestination, matchingCategory.FolderName);
             return;
         }
 
-        var archiveDestinationDirectory = GetDistributionDestinationDirectory(
-            Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName),
-            filePath);
+        var archiveDestinationDirectory = Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName);
         var archiveDestination = _archiveService.HandleArchive(filePath, archiveDestinationDirectory);
         RecordMovedFile(archiveDestination, categoryName);
     }
