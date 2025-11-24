@@ -22,13 +22,18 @@ public sealed class DistributionDetector : IDistributionDetector
             return false;
         }
 
+        var folderName = Path.GetFileName(path) ?? string.Empty;
+        if (IsSoftFolder(folderName))
+        {
+            return false;
+        }
+
         var topLevelFiles = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly);
         if (topLevelFiles.Any(file => MatchesInstaller(file)))
         {
             return true;
         }
 
-        var folderName = Path.GetFileName(path) ?? string.Empty;
         return SetupKeywords.IsMatch(folderName);
     }
 
@@ -42,5 +47,13 @@ public sealed class DistributionDetector : IDistributionDetector
 
         var fileName = Path.GetFileNameWithoutExtension(filePath) ?? string.Empty;
         return SetupKeywords.IsMatch(fileName);
+    }
+
+    private static bool IsSoftFolder(string folderName)
+    {
+        var normalizedName = folderName.TrimStart('_');
+
+        return normalizedName.Equals("soft", StringComparison.OrdinalIgnoreCase)
+            || normalizedName.Equals("софт", StringComparison.OrdinalIgnoreCase);
     }
 }
