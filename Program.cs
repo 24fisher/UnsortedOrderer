@@ -35,6 +35,7 @@ Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
 Console.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
 Console.WriteLine($"  EBooksFolderName: {settings.EBooksFolderName}");
 Console.WriteLine($"  RepositoriesFolderName: {settings.RepositoriesFolderName}");
+Console.WriteLine($"  DriversFolderName: {settings.DriversFolderName}");
 Console.WriteLine($"  FirmwareFolderName: {settings.FirmwareFolderName}");
 Console.WriteLine($"  MetadataFolderName: {settings.MetadataFolderName}");
 Console.WriteLine();
@@ -54,6 +55,7 @@ var categories = new IFileCategory[]
     new CertificatesCategory(),
     new FirmwareCategory(settings.FirmwareFolderName),
     new MetadataCategory(settings.MetadataFolderName),
+    new DriversCategory(settings.DriversFolderName),
     new RepositoriesCategory(settings.RepositoriesFolderName),
     new SoftCategory(settings.SoftFolderName),
     new UnknownCategory(settings.UnknownFolderName)

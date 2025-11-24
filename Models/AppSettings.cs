@@ -13,6 +13,7 @@ public sealed class AppSettings
         string musicalInstrumentsFolderName,
         string eBooksFolderName,
         string repositoriesFolderName,
+        string driversFolderName,
         string firmwareFolderName,
         string metadataFolderName,
         string unknownFolderName,
@@ -28,6 +29,7 @@ public sealed class AppSettings
         MusicalInstrumentsFolderName = musicalInstrumentsFolderName;
         EBooksFolderName = eBooksFolderName;
         RepositoriesFolderName = repositoriesFolderName;
+        DriversFolderName = driversFolderName;
         FirmwareFolderName = firmwareFolderName;
         MetadataFolderName = metadataFolderName;
         UnknownFolderName = unknownFolderName;
@@ -53,6 +55,8 @@ public sealed class AppSettings
     public string EBooksFolderName { get; }
 
     public string RepositoriesFolderName { get; }
+
+    public string DriversFolderName { get; }
 
     public string FirmwareFolderName { get; }
 

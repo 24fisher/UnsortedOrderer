@@ -189,6 +189,12 @@ public sealed class FileOrganizerService
 
     private IFileCategory? ResolveCategory(string filePath, string extension)
     {
+        var driversCategory = _categories.OfType<DriversCategory>().FirstOrDefault();
+        if (driversCategory is not null && driversCategory.IsDriverFile(filePath))
+        {
+            return driversCategory;
+        }
+
         if (_imageCategories.Any(category => category.Matches(extension)))
         {
             var photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
