@@ -33,11 +33,11 @@ public sealed class FileOrganizerService
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, int> _deletedUncategorizedFiles = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _deletedFilesByExtension = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedExtensions;
     private int _totalMovedFiles;
     private int _totalUnknownFiles;
-    private int _totalDeletedUncategorizedFiles;
+    private int _totalDeletedFiles;
 
     public FileOrganizerService(
         AppSettings settings,
@@ -119,7 +119,7 @@ public sealed class FileOrganizerService
 
         if (_deletedExtensions.Contains(extension))
         {
-            RecordDeletedUncategorizedFile(extension);
+            RecordDeletedFile(extension);
             File.Delete(filePath);
             return;
         }
@@ -337,18 +337,18 @@ public sealed class FileOrganizerService
         RecordMovedFile(destination, _unknownCategory.FolderName);
     }
 
-    private void RecordDeletedUncategorizedFile(string extension)
+    private void RecordDeletedFile(string extension)
     {
-        _totalDeletedUncategorizedFiles++;
+        _totalDeletedFiles++;
         var key = string.IsNullOrWhiteSpace(extension) ? "(no extension)" : extension;
 
-        if (_deletedUncategorizedFiles.ContainsKey(key))
+        if (_deletedFilesByExtension.ContainsKey(key))
         {
-            _deletedUncategorizedFiles[key]++;
+            _deletedFilesByExtension[key]++;
         }
         else
         {
-            _deletedUncategorizedFiles[key] = 1;
+            _deletedFilesByExtension[key] = 1;
         }
     }
 
@@ -412,18 +412,7 @@ public sealed class FileOrganizerService
             }
         }
 
-        if (_totalDeletedUncategorizedFiles == 0)
-        {
-            Console.WriteLine("Deleted uncategorized files: none");
-        }
-        else
-        {
-            Console.WriteLine($"Deleted uncategorized files: {_totalDeletedUncategorizedFiles}");
-            foreach (var deleted in _deletedUncategorizedFiles.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                Console.WriteLine($"  {deleted.Key}: {deleted.Value}");
-            }
-        }
+        PrintDeletedFilesByExtension();
 
         if (_deletedDirectories.Count == 0)
         {
@@ -436,5 +425,39 @@ public sealed class FileOrganizerService
         {
             Console.WriteLine($"  {directory}");
         }
+
+        PrintSourceDirectoryCompletion();
+    }
+
+    private void PrintDeletedFilesByExtension()
+    {
+        var filteredDeleted = _deletedFilesByExtension
+            .Where(kvp => !kvp.Key.Equals(".tmp", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        if (_totalDeletedFiles == 0 || filteredDeleted.Length == 0)
+        {
+            Console.WriteLine("Deleted uncategorized files: none");
+            return;
+        }
+
+        Console.WriteLine($"Deleted uncategorized files: {filteredDeleted.Sum(kvp => kvp.Value)}");
+        foreach (var deleted in filteredDeleted.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"  {deleted.Key}: {deleted.Value}");
+        }
+    }
+
+    private void PrintSourceDirectoryCompletion()
+    {
+        if (!IsDirectoryEmpty(_settings.SourceDirectory))
+        {
+            return;
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("====================");
+        Console.WriteLine("Source directory fully processed. No files remain to organize.");
+        Console.WriteLine("====================");
     }
 }
