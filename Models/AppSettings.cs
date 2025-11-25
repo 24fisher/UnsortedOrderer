@@ -17,7 +17,8 @@ public sealed class AppSettings
         string firmwareFolderName,
         string metadataFolderName,
         string unknownFolderName,
-        string[] deletedExtensions)
+        string[] deletedExtensions,
+        string[] documentImageKeywords)
     {
         SourceDirectory = sourceDirectory;
         DestinationRoot = destinationRoot;
@@ -34,6 +35,7 @@ public sealed class AppSettings
         MetadataFolderName = metadataFolderName;
         UnknownFolderName = unknownFolderName;
         DeletedExtensions = deletedExtensions;
+        DocumentImageKeywords = documentImageKeywords;
     }
 
     public string SourceDirectory { get; }
@@ -65,4 +67,6 @@ public sealed class AppSettings
     public string UnknownFolderName { get; }
 
     public string[] DeletedExtensions { get; }
+
+    public string[] DocumentImageKeywords { get; }
 }
