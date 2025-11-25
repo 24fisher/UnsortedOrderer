@@ -11,31 +11,13 @@ public sealed class FileOrganizerService
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
-    private readonly IFileCategory? _documentsCategory;
+    private readonly DocumentsCategory? _documentsCategory;
     private readonly DriversCategory? _driversCategory;
     private readonly PhotosCategory? _photosCategory;
     private readonly ImagesCategory? _imagesCategory;
     private readonly CategoryCache _categoryCache;
     private readonly UnknownCategory _unknownCategory;
-    private static readonly string[] DocumentImageKeywords = new[]
-    {
-        "скан",
-        "паспорт",
-        "свидетельство",
-        "документ",
-        "анкета",
-        "виза",
-        "заявление",
-        "удостоверение",
-        "справка",
-        "сертификат",
-        "снилс",
-        "водительское",
-        "загран",
-        "регистрация",
-        "патент",
-        "полис"
-    };
+    private readonly SpecialCategoriesHandler _specialCategoriesHandler;
     private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
@@ -63,6 +45,11 @@ public sealed class FileOrganizerService
         _photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
         _imagesCategory = _imageCategories.OfType<ImagesCategory>().FirstOrDefault();
         _categoryCache = new CategoryCache(_categories);
+        _specialCategoriesHandler = new SpecialCategoriesHandler(
+            _imageCategories,
+            _documentsCategory,
+            _categoryCache,
+            _settings.DocumentImageKeywords);
         _deletedExtensions = FileUtilities
             .NormalizeExtensions(settings.DeletedExtensions)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -139,7 +126,7 @@ public sealed class FileOrganizerService
             return;
         }
 
-        var category = TryGetSpecialCategory(filePath, extension)
+        var category = _specialCategoriesHandler.TryGetSpecialCategory(filePath, extension)
             ?? ResolveCategory(filePath, extension);
         if (category is null)
         {
@@ -169,30 +156,6 @@ public sealed class FileOrganizerService
                 RecordMovedFile(destination, category.FolderName);
                 break;
         }
-    }
-
-    private IFileCategory? TryGetSpecialCategory(string filePath, string extension)
-    {
-        if (_imageCategories.Count == 0 || _documentsCategory is null)
-        {
-            return null;
-        }
-
-        if (!_categoryCache.ImageCategoryExtensions.Contains(extension))
-        {
-            return null;
-        }
-
-        var fileName = Path.GetFileNameWithoutExtension(filePath);
-        if (string.IsNullOrWhiteSpace(fileName))
-        {
-            return null;
-        }
-
-        var lowerInvariantName = fileName.ToLowerInvariant();
-        return DocumentImageKeywords.Any(keyword => lowerInvariantName.Contains(keyword))
-            ? _documentsCategory
-            : null;
     }
 
     private IFileCategory? ResolveCategory(string filePath, string extension)
