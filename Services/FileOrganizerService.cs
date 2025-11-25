@@ -11,6 +11,11 @@ public sealed class FileOrganizerService
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
+    private readonly IFileCategory? _documentsCategory;
+    private readonly DriversCategory? _driversCategory;
+    private readonly PhotosCategory? _photosCategory;
+    private readonly ImagesCategory? _imagesCategory;
+    private readonly CategoryCache _categoryCache;
     private readonly UnknownCategory _unknownCategory;
     private static readonly string[] DocumentImageKeywords = new[]
     {
@@ -53,6 +58,11 @@ public sealed class FileOrganizerService
         _categories = categories.ToArray();
         _nonSplittableCategories = _categories.OfType<INonSplittableDirectoryCategory>().ToArray();
         _imageCategories = _categories.OfType<ImageCategoryBase>().ToArray();
+        _documentsCategory = _categories.OfType<DocumentsCategory>().FirstOrDefault();
+        _driversCategory = _categories.OfType<DriversCategory>().FirstOrDefault();
+        _photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
+        _imagesCategory = _imageCategories.OfType<ImagesCategory>().FirstOrDefault();
+        _categoryCache = new CategoryCache(_categories);
         _deletedExtensions = FileUtilities
             .NormalizeExtensions(settings.DeletedExtensions)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -163,14 +173,12 @@ public sealed class FileOrganizerService
 
     private IFileCategory? TryGetSpecialCategory(string filePath, string extension)
     {
-        var documentsCategory = _categories.OfType<DocumentsCategory>().FirstOrDefault();
-
-        if (!_imageCategories.Any() || documentsCategory is null)
+        if (_imageCategories.Count == 0 || _documentsCategory is null)
         {
             return null;
         }
 
-        if (!_imageCategories.Any(category => category.Matches(extension)))
+        if (!_categoryCache.ImageCategoryExtensions.Contains(extension))
         {
             return null;
         }
@@ -183,34 +191,32 @@ public sealed class FileOrganizerService
 
         var lowerInvariantName = fileName.ToLowerInvariant();
         return DocumentImageKeywords.Any(keyword => lowerInvariantName.Contains(keyword))
-            ? documentsCategory
+            ? _documentsCategory
             : null;
     }
 
     private IFileCategory? ResolveCategory(string filePath, string extension)
     {
-        var driversCategory = _categories.OfType<DriversCategory>().FirstOrDefault();
-        if (driversCategory is not null && driversCategory.IsDriverFile(filePath))
+        if (_driversCategory is not null && _driversCategory.IsDriverFile(filePath))
         {
-            return driversCategory;
+            return _driversCategory;
         }
 
-        if (_imageCategories.Any(category => category.Matches(extension)))
+        if (_categoryCache.ImageCategoryExtensions.Contains(extension))
         {
-            var photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
-            var imagesCategory = _imageCategories.OfType<ImagesCategory>().FirstOrDefault();
-
-            if (photosCategory is null || imagesCategory is null)
+            if (_photosCategory is null || _imagesCategory is null)
             {
                 return _imageCategories.FirstOrDefault(category => category.Matches(extension));
             }
 
             return _photoService.IsPhoto(filePath)
-                ? photosCategory
-                : imagesCategory;
+                ? _photosCategory
+                : _imagesCategory;
         }
 
-        return _categories.FirstOrDefault(c => c.Matches(extension));
+        return _categoryCache.CategoriesByExtension.TryGetValue(extension, out var category)
+            ? category
+            : null;
     }
 
     private void MoveNonSplittableDirectory(string directory, INonSplittableDirectoryCategory category)
