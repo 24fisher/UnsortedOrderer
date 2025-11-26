@@ -1,4 +1,6 @@
-namespace UnsortedOrderer.Models;
+using UnsortedOrderer.Models;
+
+namespace UnsortedOrderer.Infrastructure.Mappers;
 
 public static class AppSettingsMapper
 {
