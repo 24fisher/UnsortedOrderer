@@ -13,6 +13,8 @@
 - `RepositoriesFolderName` — subfolder name for repositories and source folders.
 - `FirmwareFolderName` — subfolder name for firmware files (`.bin`, `.dat`).
 - `MetadataFolderName` — subfolder name for metadata and sidecar files (for example, `.hprj`, `.xmp`).
+- `WebFolderName` — subfolder name for web shortcuts and saved HTML pages.
+- `GraphicsFolderName` — subfolder name for layered graphics and illustration project files.
 - `EBooksFolderName` — subfolder name for e-books and comics.
 
 ## Sorting logic
@@ -20,6 +22,8 @@
 - Large photos (including RAW) are moved to `PhotosFolderName` with a year/month breakdown determined from EXIF or file creation date. If EXIF dates are earlier than 1980, the file creation date is used instead.
 - Small images (icons, previews, logos) go to the `images` subfolder inside `ImagesFolderName` without date breakdown. Size is determined by resolution (up to 512 px on the longer side) and file size (up to ~300 KB for small images).
 - Documents, videos, 3D models, archives, digital certificates, firmware files, metadata, and software are sent to dedicated folders.
+- HTML files and browser shortcuts (`.html`, `.htm`, `.xhtml`, `.mhtml`, `.mht`, `.url`, `.webloc`, `.website`) move to `WebFolderName`.
+- Graphics editor project files (for example, `.psd`, `.psb`, `.ai`, `.eps`, `.xcf`, `.kra`, `.ora`, `.clip`, `.afphoto`, `.afdesign`, `.afpub`, `.cdr`, `.sai`, `.mdp`, `.pdn`, `.pspimage`, `.reb`, `.sketch`, `.fig`) move to `GraphicsFolderName`.
 - E-books (`.epub`, `.fb2`, `.mobi`, `.azw3`, `.djvu`, `.cbr`, `.cbz`, `.ibooks`, `.kfx`) move to the `EBooksFolderName` folder.
 - Video files go to `Videos` with automatic grouping by year, and within that by camera/phone make (`DJI Action`, `GoPro`, `Sony`, `Canon`, `Nikon`, `Ricoh`, `iPhone`, `Samsung`, `Google Pixel`, `Xiaomi`, `Realme`, `Nokia`, `Huawei`, `OnePlus`, `Motorola`, `Oppo`, `Vivo`, `LG`, `Asus`, `ZTE`) based on filename patterns. If metadata dates resolve to earlier than 1980, the file creation date is used to determine the year.
 - If installer names (archives, `exe`, `msi`) differ only by version, files are gathered into a shared folder named after the program within the destination directory.

@@ -37,6 +37,8 @@ public class CategoryExtensionsTests
             new MusicalInstrumentsCategory("MusicalInstruments"),
             new EBooksCategory("EBooks"),
             new DocumentsCategory(),
+            new WebCategory("Web"),
+            new GraphicsCategory("Graphics"),
             new VideosCategory(
                 CreateVideoCameraFileNamePatternServices(),
                 new StubVideoDateService(),

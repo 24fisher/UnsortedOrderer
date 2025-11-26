@@ -28,6 +28,10 @@ public sealed class AppSettingsDto
 
     public string? MetadataFolderName { get; set; }
 
+    public string? WebFolderName { get; set; }
+
+    public string? GraphicsFolderName { get; set; }
+
     public string? UnknownFolderName { get; set; }
 
     public string[]? DeletedExtensions { get; set; }
