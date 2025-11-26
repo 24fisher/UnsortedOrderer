@@ -1,7 +1,7 @@
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
 
-namespace UnsortedOrderer.Core.Application;
+namespace UnsortedOrderer.Application.Application;
 
 public sealed class FileOrganizerApplication
 {

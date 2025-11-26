@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using UnsortedOrderer.Core.Application;
-using UnsortedOrderer.Core.DependencyInjection;
+using UnsortedOrderer.Application.Application;
+using UnsortedOrderer.Application.DependencyInjection;
 using UnsortedOrderer.Infrastructure.Mappers;
-using UnsortedOrderer.Infrastructure.Services;
 using UnsortedOrderer.Models;
+using UnsortedOrderer.Services;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -16,7 +16,7 @@ var settings = AppSettingsMapper.Map(configuration.Get<AppSettingsDto>() ?? new 
 var services = new ServiceCollection();
 
 services.AddSingleton<IMessageWriter, ConsoleMessageWriter>();
-services.AddUnsortedOrdererCore(settings);
+services.AddUnsortedOrdererApplication(settings);
 
 using var serviceProvider = services.BuildServiceProvider();
 
