@@ -1,0 +1,43 @@
+using Microsoft.Extensions.DependencyInjection;
+using UnsortedOrderer.Categories;
+using UnsortedOrderer.Models;
+using UnsortedOrderer.Services;
+
+namespace UnsortedOrderer.Core.DependencyInjection;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddUnsortedOrdererCore(this IServiceCollection services, AppSettings settings)
+    {
+        services.AddSingleton(settings);
+        services.AddSingleton<IArchiveService, ArchiveService>();
+        services.AddSingleton<IPhotoService, PhotoService>();
+        services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
+        {
+            var appSettings = provider.GetRequiredService<AppSettings>();
+            return new IFileCategory[]
+            {
+                new PhotosCategory(appSettings.PhotosFolderName),
+                new ImagesCategory(appSettings.ImagesFolderName),
+                new MusicCategory(appSettings.MusicFolderName),
+                new MusicalInstrumentsCategory(appSettings.MusicalInstrumentsFolderName),
+                new EBooksCategory(appSettings.EBooksFolderName),
+                new DocumentsCategory(),
+                new VideosCategory(),
+                new ThreeDModelsCategory(),
+                new ArchivesCategory(appSettings.ArchiveFolderName),
+                new CertificatesCategory(),
+                new FirmwareCategory(appSettings.FirmwareFolderName),
+                new MetadataCategory(appSettings.MetadataFolderName),
+                new DriversCategory(appSettings.DriversFolderName),
+                new RepositoriesCategory(appSettings.RepositoriesFolderName),
+                new SoftCategory(appSettings.SoftFolderName),
+                new UnknownCategory(appSettings.UnknownFolderName)
+            };
+        });
+        services.AddSingleton<FileOrganizerService>();
+        services.AddSingleton<FileOrganizerApplication>();
+
+        return services;
+    }
+}
