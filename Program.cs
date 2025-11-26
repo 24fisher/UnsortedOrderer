@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
@@ -14,57 +15,67 @@ var deletionExtensions = FileUtilities
     .Distinct(StringComparer.OrdinalIgnoreCase)
     .ToArray();
 
+var services = new ServiceCollection();
+
+services.AddSingleton(settings);
+services.AddSingleton<IMessageWriter, ConsoleMessageWriter>();
+services.AddSingleton<IArchiveService, ArchiveService>();
+services.AddSingleton<IPhotoService, PhotoService>();
+services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
+{
+    var appSettings = provider.GetRequiredService<AppSettings>();
+    return new IFileCategory[]
+    {
+        new PhotosCategory(appSettings.PhotosFolderName),
+        new ImagesCategory(appSettings.ImagesFolderName),
+        new MusicCategory(appSettings.MusicFolderName),
+        new MusicalInstrumentsCategory(appSettings.MusicalInstrumentsFolderName),
+        new EBooksCategory(appSettings.EBooksFolderName),
+        new DocumentsCategory(),
+        new VideosCategory(),
+        new ThreeDModelsCategory(),
+        new ArchivesCategory(appSettings.ArchiveFolderName),
+        new CertificatesCategory(),
+        new FirmwareCategory(appSettings.FirmwareFolderName),
+        new MetadataCategory(appSettings.MetadataFolderName),
+        new DriversCategory(appSettings.DriversFolderName),
+        new RepositoriesCategory(appSettings.RepositoriesFolderName),
+        new SoftCategory(appSettings.SoftFolderName),
+        new UnknownCategory(appSettings.UnknownFolderName)
+    };
+});
+services.AddSingleton<FileOrganizerService>();
+
+using var serviceProvider = services.BuildServiceProvider();
+
+var messageWriter = serviceProvider.GetRequiredService<IMessageWriter>();
+
 if (deletionExtensions.Length == 0)
 {
-    Console.WriteLine("WARNING: No file extensions configured for deletion in appsettings.json.");
+    messageWriter.WriteLine("WARNING: No file extensions configured for deletion in appsettings.json.");
 }
 else
 {
-    Console.WriteLine("WARNING: Files with these extensions will be deleted: " + string.Join(", ", deletionExtensions));
+    messageWriter.WriteLine("WARNING: Files with these extensions will be deleted: " + string.Join(", ", deletionExtensions));
 }
-Console.WriteLine();
+messageWriter.WriteLine(string.Empty);
 
-Console.WriteLine("Loaded settings:");
-Console.WriteLine($"  SourceDirectory: {settings.SourceDirectory}");
-Console.WriteLine($"  DestinationRoot: {settings.DestinationRoot}");
-Console.WriteLine($"  SoftFolderName: {settings.SoftFolderName}");
-Console.WriteLine($"  ArchiveFolderName: {settings.ArchiveFolderName}");
-Console.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
-Console.WriteLine($"  PhotosFolderName: {settings.PhotosFolderName}");
-Console.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
-Console.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
-Console.WriteLine($"  EBooksFolderName: {settings.EBooksFolderName}");
-Console.WriteLine($"  RepositoriesFolderName: {settings.RepositoriesFolderName}");
-Console.WriteLine($"  DriversFolderName: {settings.DriversFolderName}");
-Console.WriteLine($"  FirmwareFolderName: {settings.FirmwareFolderName}");
-Console.WriteLine($"  MetadataFolderName: {settings.MetadataFolderName}");
-Console.WriteLine();
-Console.WriteLine("Starting organization...");
+messageWriter.WriteLine("Loaded settings:");
+messageWriter.WriteLine($"  SourceDirectory: {settings.SourceDirectory}");
+messageWriter.WriteLine($"  DestinationRoot: {settings.DestinationRoot}");
+messageWriter.WriteLine($"  SoftFolderName: {settings.SoftFolderName}");
+messageWriter.WriteLine($"  ArchiveFolderName: {settings.ArchiveFolderName}");
+messageWriter.WriteLine($"  ImagesFolderName: {settings.ImagesFolderName}");
+messageWriter.WriteLine($"  PhotosFolderName: {settings.PhotosFolderName}");
+messageWriter.WriteLine($"  MusicFolderName: {settings.MusicFolderName}");
+messageWriter.WriteLine($"  MusicalInstrumentsFolderName: {settings.MusicalInstrumentsFolderName}");
+messageWriter.WriteLine($"  EBooksFolderName: {settings.EBooksFolderName}");
+messageWriter.WriteLine($"  RepositoriesFolderName: {settings.RepositoriesFolderName}");
+messageWriter.WriteLine($"  DriversFolderName: {settings.DriversFolderName}");
+messageWriter.WriteLine($"  FirmwareFolderName: {settings.FirmwareFolderName}");
+messageWriter.WriteLine($"  MetadataFolderName: {settings.MetadataFolderName}");
+messageWriter.WriteLine(string.Empty);
+messageWriter.WriteLine("Starting organization...");
 
-var categories = new IFileCategory[]
-{
-    new PhotosCategory(settings.PhotosFolderName),
-    new ImagesCategory(settings.ImagesFolderName),
-    new MusicCategory(settings.MusicFolderName),
-    new MusicalInstrumentsCategory(settings.MusicalInstrumentsFolderName),
-    new EBooksCategory(settings.EBooksFolderName),
-    new DocumentsCategory(),
-    new VideosCategory(),
-    new ThreeDModelsCategory(),
-    new ArchivesCategory(settings.ArchiveFolderName),
-    new CertificatesCategory(),
-    new FirmwareCategory(settings.FirmwareFolderName),
-    new MetadataCategory(settings.MetadataFolderName),
-    new DriversCategory(settings.DriversFolderName),
-    new RepositoriesCategory(settings.RepositoriesFolderName),
-    new SoftCategory(settings.SoftFolderName),
-    new UnknownCategory(settings.UnknownFolderName)
-};
-
-var organizer = new FileOrganizerService(
-    settings,
-    new ArchiveService(),
-    new PhotoService(),
-    categories);
-
+var organizer = serviceProvider.GetRequiredService<FileOrganizerService>();
 organizer.Organize();
