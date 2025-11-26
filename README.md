@@ -1,36 +1,34 @@
 # UnsortedOrderer
 
-Консольное приложение .NET 8 для наведения порядка в папке с несортированными файлами. Настройки расположены в `UnsortedOrderer.ConsoleApp/appsettings.json`.
+.NET 8 console application for organizing a folder full of unsorted files. Configuration lives in `UnsortedOrderer.ConsoleApp/appsettings.json`.
 
-## Настройки
+## Configuration
 
-- `SourceDirectory` — путь к папке, которую нужно разобрать.
-- `DestinationRoot` — корневая папка, в которую будут перемещены отсортированные данные.
-- `SoftFolderName` — имя подпапки для программ и дистрибутивов.
-- `ArchiveFolderName` — имя подпапки для архивов.
-- `ImagesFolderName` — имя подпапки для иконок, логотипов и других мелких изображений.
-- `PhotosFolderName` — имя подпапки для крупных фотографий; внутри нее создаются каталоги по годам и месяцам съёмки.
-- `RepositoriesFolderName` — имя подпапки для репозиториев и папок с исходниками.
-- `FirmwareFolderName` — имя подпапки для файлов прошивок (`.bin`, `.dat`).
-- `MetadataFolderName` — имя подпапки для файлов метаданных и сайдкаров (например, `.hprj`, `.xmp`).
-- `EBooksFolderName` — имя подпапки для электронных книг и комиксов.
+- `SourceDirectory` — path to the folder you want to tidy up.
+- `DestinationRoot` — root directory where sorted data will be moved.
+- `SoftFolderName` — subfolder name for installers and software packages.
+- `ArchiveFolderName` — subfolder name for archives.
+- `ImagesFolderName` — subfolder name for icons, logos, and other small images.
+- `PhotosFolderName` — subfolder name for large photos; within it, the app creates year and month subdirectories based on photo capture data.
+- `RepositoriesFolderName` — subfolder name for repositories and source folders.
+- `FirmwareFolderName` — subfolder name for firmware files (`.bin`, `.dat`).
+- `MetadataFolderName` — subfolder name for metadata and sidecar files (for example, `.hprj`, `.xmp`).
+- `EBooksFolderName` — subfolder name for e-books and comics.
 
-## Логика сортировки
+## Sorting logic
 
-- Крупные фото (включая RAW) перемещаются в `PhotosFolderName` с разбивкой по годам и месяцам, определяемым из EXIF или даты создания файла.
-- Мелкие изображения (иконки, превью, логотипы) перемещаются целиком в подпапку `images` внутри каталога `ImagesFolderName` без разбивки по годам. Для определения размера используется разрешение (до 512 пикселей по большей стороне) и вес файла (до ~300 КБ для мелких изображений).
-- Документы, видео, 3D-модели, архивы, цифровые сертификаты, файлы прошивок, метаданные и ПО отправляются в отдельные каталоги.
-- Электронные книги (`.epub`, `.fb2`, `.mobi`, `.azw3`, `.djvu`, `.cbr`, `.cbz`, `.ibooks`, `.kfx`) перемещаются в каталог `EBooksFolderName`.
-- Видеофайлы складываются в `Videos` с автоматической разбивкой по годам, а внутри по подпапкам камер и телефонов (`DJI
-  Action`, `GoPro`, `Sony`, `Canon`, `Nikon`, `Ricoh`, `iPhone`, `Samsung`, `Google Pixel`, `Xiaomi`, `Realme`, `Nokia`,
-  `Huawei`, `OnePlus`, `Motorola`, `Oppo`, `Vivo`, `LG`, `Asus`, `ZTE`) по характерным шаблонам имён файлов.
-- Если в названии дистрибутива (архив, `exe`, `msi`) различается только версия, файлы складываются в общую папку с названием программы внутри целевого каталога.
-- Образы дисков (`.iso`, `.cso`, `.dmg`, `.img`, `.mdf`, `.mds`, `.nrg`, `.ccd`, `.isz`, `.vhd`, `.vhdx`) складываются в подпапку `_Образы дисков` внутри каталога ПО.
-- Репозитории и папки с исходным кодом не разбираются по файлам и целиком переносятся в `RepositoriesFolderName`. Детектор реагирует на `.git`, типовые манифесты (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml` и т. д.) или просто наличие нескольких исходников (`.cs`, `.ts`, `.js`, `.py`, `.java`, `.cpp`, `.rs` и др.).
-- Список расширений для удаления задаётся в `appsettings.json` (по умолчанию `.lnk`, `.torrent`, `.tmp`, `.ini`).
-- Папки-дистрибутивы определяются отдельным сервисом и перемещаются целиком в папку ПО, без разборки.
-- Каталоги с прошивками устройств (вместе с документацией и вспомогательными файлами) переносятся целиком в `FirmwareFolderName`.
-- При совпадении названия архива с уже перемещённой папкой ПО папка удаляется, а архив переносится на её место.
-- После обработки пустые директории удаляются.
+- Large photos (including RAW) are moved to `PhotosFolderName` with a year/month breakdown determined from EXIF or file creation date.
+- Small images (icons, previews, logos) go to the `images` subfolder inside `ImagesFolderName` without date breakdown. Size is determined by resolution (up to 512 px on the longer side) and file size (up to ~300 KB for small images).
+- Documents, videos, 3D models, archives, digital certificates, firmware files, metadata, and software are sent to dedicated folders.
+- E-books (`.epub`, `.fb2`, `.mobi`, `.azw3`, `.djvu`, `.cbr`, `.cbz`, `.ibooks`, `.kfx`) move to the `EBooksFolderName` folder.
+- Video files go to `Videos` with automatic grouping by year, and within that by camera/phone make (`DJI Action`, `GoPro`, `Sony`, `Canon`, `Nikon`, `Ricoh`, `iPhone`, `Samsung`, `Google Pixel`, `Xiaomi`, `Realme`, `Nokia`, `Huawei`, `OnePlus`, `Motorola`, `Oppo`, `Vivo`, `LG`, `Asus`, `ZTE`) based on filename patterns.
+- If installer names (archives, `exe`, `msi`) differ only by version, files are gathered into a shared folder named after the program within the destination directory.
+- Disk images (`.iso`, `.cso`, `.dmg`, `.img`, `.mdf`, `.mds`, `.nrg`, `.ccd`, `.isz`, `.vhd`, `.vhdx`) are placed in the `_Disk images` subfolder inside the software directory.
+- Repositories and source folders are moved whole into `RepositoriesFolderName` without per-file sorting. Detection reacts to `.git`, common manifests (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, etc.), or the presence of several source files (`.cs`, `.ts`, `.js`, `.py`, `.java`, `.cpp`, `.rs`, and more).
+- The list of extensions to delete is defined in `appsettings.json` (by default `.lnk`, `.torrent`, `.tmp`, `.ini`).
+- Installer directories are detected separately and moved intact into the software folder without unpacking.
+- Device firmware directories (with documentation and helper files) are moved intact into `FirmwareFolderName`.
+- When an archive name matches an already moved software folder, the folder is removed and the archive is placed in its spot.
+- Empty directories are removed after processing.
 
-Запуск производится из корня репозитория командой `dotnet run --project UnsortedOrderer.ConsoleApp/UnsortedOrderer.ConsoleApp.csproj`, предварительно убедившись, что пути в `appsettings.json` корректны.
+Run the app from the repository root with `dotnet run --project UnsortedOrderer.ConsoleApp/UnsortedOrderer.ConsoleApp.csproj` after verifying paths in `appsettings.json` are correct.
