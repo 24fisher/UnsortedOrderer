@@ -43,10 +43,10 @@ public static class ServiceCollectionExtensions
                 new ThreeDModelsCategory(),
                 new ArchivesCategory(appSettings.ArchiveFolderName),
                 new CertificatesCategory(),
+                new RepositoriesCategory(appSettings.RepositoriesFolderName),
                 new FirmwareCategory(appSettings.FirmwareFolderName),
                 new MetadataCategory(appSettings.MetadataFolderName),
                 new DriversCategory(appSettings.DriversFolderName),
-                new RepositoriesCategory(appSettings.RepositoriesFolderName),
                 new SoftCategory(appSettings.SoftFolderName),
                 new UnknownCategory(appSettings.UnknownFolderName)
             };
