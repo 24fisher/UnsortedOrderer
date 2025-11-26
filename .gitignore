@@ -1,0 +1,127 @@
+###############################
+# Build folders
+###############################
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+
+###############################
+# Debug/Release
+###############################
+Debug/
+Release/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+###############################
+# Visual Studio
+###############################
+.vs/
+*.user
+*.userosscache
+*.suo
+*.tmp
+*.sln.docstates
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Dotnet IDE-generated
+project.lock.json
+project.fragment.lock.json
+GeneratedMSBuildEditorConfig.editorconfig
+
+###############################
+# Rider (JetBrains)
+###############################
+.idea/
+*.sln.iml
+.shelf/
+
+###############################
+# VS Code
+###############################
+.vscode/
+.history/
+
+###############################
+# NuGet
+###############################
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+###############################
+# Cache / Temp
+###############################
+*.cache
+*.pid
+*.seed
+*.log
+*.bak
+*.tmp
+*.temp
+
+# Thumbnail caches
+*.DS_Store
+Thumbs.db
+
+###############################
+# Resharper
+###############################
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+###############################
+# Coverage / Reports
+###############################
+coverage*
+*.coverage
+*.coveragexml
+
+###############################
+# Logs / Dumps
+###############################
+*.dmp
+*.stackdump
+*.ETL
+*.etl
+
+###############################
+# Auto-generated
+###############################
+*.g.cs
+*.generated.cs
+*_i.c
+*_p.c
+*_h.h
+
+###############################
+# Entity Framework
+###############################
+Migrations/**/Designer.cs
+
+###############################
+# Copilot
+###############################
+.github/copilot.*
+.github/copilot/**
+
+###############################
+# Other common dev stuff
+###############################
+*.sqlite
+*.sqlite3
+*.db3
+*.mdf
+*.ldf
+*.bak
