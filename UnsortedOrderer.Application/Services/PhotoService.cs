@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using UnsortedOrderer.Contracts.Services;
+using UnsortedOrderer.Models;
 namespace UnsortedOrderer.Services;
 
 public sealed class PhotoService : IPhotoService
@@ -9,9 +12,11 @@ public sealed class PhotoService : IPhotoService
     private const long SmallImageMaxBytes = 300 * 1024;
     private const int DateTakenId = 0x9003; // PropertyTagExifDTOrig
 
-    public PhotoService(ICameraFileNamePatternService cameraFileNamePatternService)
+    public PhotoService(IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices)
     {
-        _cameraFileNamePatternService = cameraFileNamePatternService;
+        _cameraFileNamePatternService = cameraFileNamePatternServices
+            .FirstOrDefault(service => service.MediaType == CameraMediaType.Photo)
+            ?? throw new InvalidOperationException("Photo camera file name pattern service is not configured.");
     }
 
     public bool IsPhoto(string filePath)
