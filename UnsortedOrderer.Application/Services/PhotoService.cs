@@ -25,6 +25,14 @@ public sealed class PhotoService : IPhotoService
 
     public bool IsPhoto(string filePath)
     {
+        var extension = Path.GetExtension(filePath);
+
+        if (string.Equals(extension, ".png", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(extension, ".gif", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
         try
         {
             using var image = Image.FromFile(filePath);

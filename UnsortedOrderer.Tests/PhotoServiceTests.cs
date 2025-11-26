@@ -69,6 +69,22 @@ public class PhotoServiceTests
         Assert.Equal("Sony ILCE-7M3", folder);
     }
 
+    [Theory]
+    [InlineData(".png", ImageFormat.Png)]
+    [InlineData(".gif", ImageFormat.Gif)]
+    public void IsPhoto_returns_false_for_large_png_and_gif(string extension, ImageFormat format)
+    {
+        using var tempDirectory = new TempDirectory();
+        var metadataService = new StubPhotoCameraMetadataService(null);
+        var patternService = new StubCameraPatternService(CameraMediaType.Photo, null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService);
+        var imagePath = CreateLargeImage(tempDirectory.Path, extension, format);
+
+        var result = photoService.IsPhoto(imagePath);
+
+        Assert.False(result);
+    }
+
     private static string CreateImage(string directory, DateTime creationTime)
     {
         var path = Path.Combine(directory, $"{Guid.NewGuid():N}.jpg");
@@ -88,6 +104,15 @@ public class PhotoServiceTests
         SetAsciiProperty(bitmap, 0x010F, make); // Make
         SetAsciiProperty(bitmap, 0x0110, model); // Model
         bitmap.Save(path, ImageFormat.Jpeg);
+
+        return path;
+    }
+
+    private static string CreateLargeImage(string directory, string extension, ImageFormat format)
+    {
+        var path = Path.Combine(directory, $"{Guid.NewGuid():N}{extension}");
+        using var bitmap = new Bitmap(1024, 1024);
+        bitmap.Save(path, format);
 
         return path;
     }
