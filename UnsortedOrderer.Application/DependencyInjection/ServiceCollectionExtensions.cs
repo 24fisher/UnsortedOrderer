@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ICameraFileNamePatternService>(
             _ => new VideoCameraFileNamePatternService(settings.CameraFileNamePatterns));
         services.AddSingleton<IMessengerPathService, MessengerPathService>();
+        services.AddSingleton<IDesktopCleanupService, DesktopCleanupService>();
         services.AddSingleton<IPhotoCameraMetadataService, PhotoCameraMetadataService>();
         services.AddSingleton<IVideoDateService, VideoDateService>();
         services.AddSingleton<IPhotoService, PhotoService>();

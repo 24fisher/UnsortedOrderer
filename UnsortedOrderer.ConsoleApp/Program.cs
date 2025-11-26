@@ -21,5 +21,9 @@ services.AddUnsortedOrdererApplication(settings);
 
 using var serviceProvider = services.BuildServiceProvider();
 
+serviceProvider
+    .GetRequiredService<IDesktopCleanupService>()
+    .CleanIfRunningFromDesktop(settings.SourceDirectory);
+
 var application = serviceProvider.GetRequiredService<FileOrganizerApplication>();
 application.Run();
