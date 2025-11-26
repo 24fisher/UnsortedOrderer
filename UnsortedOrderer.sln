@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsortedOrderer", "UnsortedOrderer.csproj", "{DB10DF4D-852B-6F55-CF20-9F7AD95054B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsortedOrderer", "UnsortedOrderer.ConsoleApp\\UnsortedOrderer.csproj", "{DB10DF4D-852B-6F55-CF20-9F7AD95054B4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsortedOrderer.Core", "UnsortedOrderer.Core\\UnsortedOrderer.Core.csproj", "{A01F444F-BBD8-4E10-A28D-3733ED867880}"
 EndProject

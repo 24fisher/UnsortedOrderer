@@ -7,7 +7,7 @@ using UnsortedOrderer.Infrastructure.Services;
 using UnsortedOrderer.Models;
 
 var configuration = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
+    .SetBasePath(AppContext.BaseDirectory)
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
     .Build();
 
