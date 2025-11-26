@@ -23,6 +23,15 @@ public class FileOrganizerServiceTests
         method.Invoke(organizer, new object[] { filePath });
     }
 
+    private static void InvokeProcessDirectory(FileOrganizerService organizer, string directoryPath)
+    {
+        var method = typeof(FileOrganizerService)
+            .GetMethod("ProcessDirectory", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("ProcessDirectory method not found.");
+
+        method.Invoke(organizer, new object[] { directoryPath });
+    }
+
     private sealed class StubArchiveService : IArchiveService
     {
         public string HandleArchive(string archivePath, string destinationDirectory)
@@ -46,6 +55,11 @@ public class FileOrganizerServiceTests
         {
             throw new NotSupportedException();
         }
+    }
+
+    private sealed class StubMessengerPathService : IMessengerPathService
+    {
+        public string? GetMessengerFolder(string filePath) => null;
     }
 
     private sealed class RecordingStatisticsService : IStatisticsService
@@ -115,5 +129,64 @@ public class FileOrganizerServiceTests
                 // ignore cleanup errors in tests
             }
         }
+    }
+
+    [Fact]
+    public void RepositoryInsideWrapperDirectories_IsExtractedAndMoved()
+    {
+        using var source = new TempDirectory();
+        using var destination = new TempDirectory();
+
+        var outer = System.IO.Path.Combine(source.Path, "outer");
+        var inner = System.IO.Path.Combine(outer, "inner");
+        var repositoryRoot = System.IO.Path.Combine(inner, "my-repo");
+
+        Directory.CreateDirectory(repositoryRoot);
+        Directory.CreateDirectory(System.IO.Path.Combine(repositoryRoot, ".git"));
+        File.WriteAllText(System.IO.Path.Combine(repositoryRoot, "Program.cs"), "class Program { }");
+
+        var settings = new AppSettings(
+            source.Path,
+            destination.Path,
+            softFolderName: "Soft",
+            archiveFolderName: "Archives",
+            imagesFolderName: "Images",
+            photosFolderName: "Photos",
+            musicFolderName: "Music",
+            musicalInstrumentsFolderName: "Instruments",
+            eBooksFolderName: "EBooks",
+            repositoriesFolderName: "Repositories",
+            driversFolderName: "Drivers",
+            firmwareFolderName: "Firmware",
+            metadataFolderName: "Metadata",
+            unknownFolderName: "Unknown",
+            deletedExtensions: Array.Empty<string>(),
+            documentImageKeywords: Array.Empty<string>(),
+            cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
+            softwareArchiveKeywords: Array.Empty<string>());
+
+        var categories = new IFileCategory[]
+        {
+            new RepositoriesCategory(settings.RepositoriesFolderName),
+            new UnknownCategory(settings.UnknownFolderName)
+        };
+
+        var organizer = new FileOrganizerService(
+            settings,
+            new StubArchiveService(),
+            new StubPhotoService(isPhoto: false),
+            new StubMessengerPathService(),
+            categories,
+            new RecordingStatisticsService(),
+            new StubMessageWriter());
+
+        InvokeProcessDirectory(organizer, source.Path);
+
+        var repositoriesDestination = System.IO.Path.Combine(destination.Path, settings.RepositoriesFolderName);
+        var expectedRepositoryPath = System.IO.Path.Combine(repositoriesDestination, "my-repo");
+
+        Assert.True(Directory.Exists(expectedRepositoryPath));
+        Assert.False(Directory.Exists(System.IO.Path.Combine(repositoriesDestination, "outer")));
+        Assert.True(Directory.Exists(outer));
     }
 }

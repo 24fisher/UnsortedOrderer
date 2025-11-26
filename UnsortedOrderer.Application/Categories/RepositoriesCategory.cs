@@ -43,15 +43,21 @@ public sealed class RepositoriesCategory : FileCategory, INonSplittableDirectory
 
     public bool IsNonSplittableDirectory(string path)
     {
-        return _repositoryDetector.IsRepositoryDirectory(path);
+        return GetRepositoryRoot(path) is not null;
+    }
+
+    public string? GetRepositoryRoot(string path)
+    {
+        return _repositoryDetector.FindRepositoryRoot(path);
     }
 
     public string GetDirectoryDestination(string destinationRoot, string directoryPath)
     {
+        var repositoryRoot = GetRepositoryRoot(directoryPath) ?? directoryPath;
         var categoryRoot = Path.Combine(destinationRoot, FolderName);
         Directory.CreateDirectory(categoryRoot);
 
-        var directoryName = Path.GetFileName(directoryPath) ?? "Repository";
+        var directoryName = Path.GetFileName(repositoryRoot) ?? "Repository";
         return FileUtilities.GetUniqueDirectoryPath(categoryRoot, directoryName);
     }
 

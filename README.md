@@ -25,6 +25,7 @@
 - If installer names (archives, `exe`, `msi`) differ only by version, files are gathered into a shared folder named after the program within the destination directory.
 - Disk images (`.iso`, `.cso`, `.dmg`, `.img`, `.mdf`, `.mds`, `.nrg`, `.ccd`, `.isz`, `.vhd`, `.vhdx`) are placed in the `_Disk images` subfolder inside the software directory.
 - Repositories and source folders are moved whole into `RepositoriesFolderName` without per-file sorting. Detection reacts to `.git`, common manifests (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, etc.), or the presence of several source files (`.cs`, `.ts`, `.js`, `.py`, `.java`, `.cpp`, `.rs`, and more).
+- When a repository folder is wrapped in one or more parent directories (for example, after extracting an archive), the sorter unwraps those shells and moves only the repository directory itself into `RepositoriesFolderName`.
 - The list of extensions to delete is defined in `appsettings.json` (by default `.lnk`, `.torrent`, `.tmp`, `.ini`).
 - Installer directories are detected separately and moved intact into the software folder without unpacking.
 - Device firmware directories (with documentation and helper files) are moved intact into `FirmwareFolderName`.
