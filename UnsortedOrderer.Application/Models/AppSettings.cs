@@ -18,7 +18,8 @@ public sealed class AppSettings
         string metadataFolderName,
         string unknownFolderName,
         string[] deletedExtensions,
-        string[] documentImageKeywords)
+        string[] documentImageKeywords,
+        string[] softwareArchiveKeywords)
     {
         SourceDirectory = sourceDirectory;
         DestinationRoot = destinationRoot;
@@ -36,6 +37,7 @@ public sealed class AppSettings
         UnknownFolderName = unknownFolderName;
         DeletedExtensions = deletedExtensions;
         DocumentImageKeywords = documentImageKeywords;
+        SoftwareArchiveKeywords = softwareArchiveKeywords;
     }
 
     public string SourceDirectory { get; }
@@ -69,4 +71,6 @@ public sealed class AppSettings
     public string[] DeletedExtensions { get; }
 
     public string[] DocumentImageKeywords { get; }
+
+    public string[] SoftwareArchiveKeywords { get; }
 }

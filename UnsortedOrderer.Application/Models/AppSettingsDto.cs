@@ -33,4 +33,6 @@ public sealed class AppSettingsDto
     public string[]? DeletedExtensions { get; set; }
 
     public string[]? DocumentImageKeywords { get; set; }
+
+    public string[]? SoftwareArchiveKeywords { get; set; }
 }

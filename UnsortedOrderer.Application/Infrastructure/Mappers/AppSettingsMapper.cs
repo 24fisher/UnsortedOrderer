@@ -27,7 +27,8 @@ public static class AppSettingsMapper
             Require(dto.MetadataFolderName, nameof(dto.MetadataFolderName)),
             Require(dto.UnknownFolderName, nameof(dto.UnknownFolderName)),
             dto.DeletedExtensions ?? Array.Empty<string>(),
-            dto.DocumentImageKeywords ?? Array.Empty<string>());
+            dto.DocumentImageKeywords ?? Array.Empty<string>(),
+            dto.SoftwareArchiveKeywords ?? Array.Empty<string>());
     }
 
     private static string Require(string? value, string name)
