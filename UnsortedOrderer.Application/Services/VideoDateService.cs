@@ -52,14 +52,14 @@ public sealed class VideoDateService : IVideoDateService
                 return creationDate;
             }
 
-            var quickTimeDirectory = directories.OfType<QuickTimeDirectory>().FirstOrDefault();
-            if (TryGetDate(quickTimeDirectory, QuickTimeDirectory.TagCreationTime, out creationDate))
+            var quickTimeDirectory = directories.OfType<QuickTimeMetadataHeaderDirectory>().FirstOrDefault();
+            if (TryGetDate(quickTimeDirectory, QuickTimeMetadataHeaderDirectory.TagCreationDate, out creationDate))
             {
                 return creationDate;
             }
 
-            var fileSystemDirectory = directories.OfType<FileSystemDirectory>().FirstOrDefault();
-            if (TryGetDate(fileSystemDirectory, FileSystemDirectory.TagFileModifiedDate, out creationDate))
+            var fileSystemDirectory = directories.OfType<FileMetadataDirectory>().FirstOrDefault();
+            if (TryGetDate(fileSystemDirectory, FileMetadataDirectory.TagFileModifiedDate, out creationDate))
             {
                 return creationDate;
             }
