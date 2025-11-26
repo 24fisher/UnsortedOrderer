@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
+using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
 
 namespace UnsortedOrderer.Categories;
@@ -13,10 +16,12 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
 
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
 
-    public VideosCategory(ICameraFileNamePatternService cameraFileNamePatternService)
+    public VideosCategory(IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices)
         : base("Videos", "Videos", VideoExtensions)
     {
-        _cameraFileNamePatternService = cameraFileNamePatternService;
+        _cameraFileNamePatternService = cameraFileNamePatternServices
+            .FirstOrDefault(service => service.MediaType == CameraMediaType.Video)
+            ?? throw new InvalidOperationException("Video camera file name pattern service is not configured.");
     }
 
     public bool IsNonSplittableDirectory(string path)

@@ -1,16 +1,20 @@
+using System.Collections.Generic;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 
 namespace UnsortedOrderer.Services;
 
-public sealed class CameraFileNamePatternService : ICameraFileNamePatternService
+public abstract class CameraFileNamePatternService : ICameraFileNamePatternService
 {
     private readonly IReadOnlyCollection<DeviceBrandPattern> _patterns;
 
-    public CameraFileNamePatternService(IReadOnlyCollection<DeviceBrandPattern> patterns)
+    protected CameraFileNamePatternService(CameraMediaType mediaType, IReadOnlyCollection<DeviceBrandPattern> patterns)
     {
+        MediaType = mediaType;
         _patterns = patterns ?? Array.Empty<DeviceBrandPattern>();
     }
+
+    public CameraMediaType MediaType { get; }
 
     public string? GetBrandByFileName(string? fileName)
     {
