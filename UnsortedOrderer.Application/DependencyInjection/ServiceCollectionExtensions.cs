@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
             _ => new PhotoCameraFileNamePatternService(settings.CameraFileNamePatterns));
         services.AddSingleton<ICameraFileNamePatternService>(
             _ => new VideoCameraFileNamePatternService(settings.CameraFileNamePatterns));
+        services.AddSingleton<IPhotoCameraMetadataService, PhotoCameraMetadataService>();
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>

@@ -8,15 +8,19 @@ namespace UnsortedOrderer.Services;
 public sealed class PhotoService : IPhotoService
 {
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
+    private readonly IPhotoCameraMetadataService _photoCameraMetadataService;
     private const int SmallImageMaxDimension = 512;
     private const long SmallImageMaxBytes = 300 * 1024;
     private const int DateTakenId = 0x9003; // PropertyTagExifDTOrig
 
-    public PhotoService(IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices)
+    public PhotoService(
+        IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices,
+        IPhotoCameraMetadataService photoCameraMetadataService)
     {
         _cameraFileNamePatternService = cameraFileNamePatternServices
             .FirstOrDefault(service => service.MediaType == CameraMediaType.Photo)
             ?? throw new InvalidOperationException("Photo camera file name pattern service is not configured.");
+        _photoCameraMetadataService = photoCameraMetadataService;
     }
 
     public bool IsPhoto(string filePath)
@@ -51,7 +55,8 @@ public sealed class PhotoService : IPhotoService
         string photosFolderName)
     {
         var date = GetPhotoDate(filePath);
-        var brandFolder = _cameraFileNamePatternService.GetBrandByFileName(Path.GetFileName(filePath));
+        var brandFolder = _photoCameraMetadataService.GetCameraFolder(filePath)
+            ?? _cameraFileNamePatternService.GetBrandByFileName(Path.GetFileName(filePath));
         var photoDirectory = Path.Combine(
             destinationRoot,
             photosFolderName,
