@@ -27,6 +27,8 @@ public static class AppSettingsMapper
             Require(dto.DriversFolderName, nameof(dto.DriversFolderName)),
             Require(dto.FirmwareFolderName, nameof(dto.FirmwareFolderName)),
             Require(dto.MetadataFolderName, nameof(dto.MetadataFolderName)),
+            Require(dto.WebFolderName, nameof(dto.WebFolderName)),
+            Require(dto.GraphicsFolderName, nameof(dto.GraphicsFolderName)),
             Require(dto.UnknownFolderName, nameof(dto.UnknownFolderName)),
             dto.DeletedExtensions ?? Array.Empty<string>(),
             dto.DocumentImageKeywords ?? Array.Empty<string>(),

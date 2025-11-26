@@ -159,6 +159,8 @@ public class FileOrganizerServiceTests
             driversFolderName: "Drivers",
             firmwareFolderName: "Firmware",
             metadataFolderName: "Metadata",
+            webFolderName: "Web",
+            graphicsFolderName: "Graphics",
             unknownFolderName: "Unknown",
             deletedExtensions: Array.Empty<string>(),
             documentImageKeywords: Array.Empty<string>(),

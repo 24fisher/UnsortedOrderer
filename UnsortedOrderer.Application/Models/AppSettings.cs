@@ -16,6 +16,8 @@ public sealed class AppSettings
         string driversFolderName,
         string firmwareFolderName,
         string metadataFolderName,
+        string webFolderName,
+        string graphicsFolderName,
         string unknownFolderName,
         string[] deletedExtensions,
         string[] documentImageKeywords,
@@ -35,6 +37,8 @@ public sealed class AppSettings
         DriversFolderName = driversFolderName;
         FirmwareFolderName = firmwareFolderName;
         MetadataFolderName = metadataFolderName;
+        WebFolderName = webFolderName;
+        GraphicsFolderName = graphicsFolderName;
         UnknownFolderName = unknownFolderName;
         DeletedExtensions = deletedExtensions;
         DocumentImageKeywords = documentImageKeywords;
@@ -67,6 +71,10 @@ public sealed class AppSettings
     public string FirmwareFolderName { get; }
 
     public string MetadataFolderName { get; }
+
+    public string WebFolderName { get; }
+
+    public string GraphicsFolderName { get; }
 
     public string UnknownFolderName { get; }
 
