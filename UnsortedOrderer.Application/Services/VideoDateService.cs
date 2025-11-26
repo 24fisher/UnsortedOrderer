@@ -8,16 +8,27 @@ using Directory = MetadataExtractor.Directory;
 
 namespace UnsortedOrderer.Services;
 
-public sealed class VideoDateService : IVideoDateService
+public class VideoDateService : IVideoDateService
 {
     public DateTime GetVideoDate(string filePath)
     {
         var metadataDate = TryGetMetadataDate(filePath);
-        if (metadataDate.HasValue)
+        if (metadataDate.HasValue && metadataDate.Value.Year >= 1980)
         {
             return metadataDate.Value;
         }
 
+        var fileTimestamp = TryGetFileTimestamp(filePath);
+        if (fileTimestamp.HasValue)
+        {
+            return fileTimestamp.Value;
+        }
+
+        return DateTime.Now;
+    }
+
+    private static DateTime? TryGetFileTimestamp(string filePath)
+    {
         try
         {
             var creationTime = File.GetCreationTime(filePath);
@@ -37,10 +48,10 @@ public sealed class VideoDateService : IVideoDateService
             // ignored, will fall back to current time
         }
 
-        return DateTime.Now;
+        return null;
     }
 
-    private static DateTime? TryGetMetadataDate(string filePath)
+    protected virtual DateTime? TryGetMetadataDate(string filePath)
     {
         try
         {
