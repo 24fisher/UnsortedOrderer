@@ -1,13 +1,18 @@
 using System.Drawing;
 using UnsortedOrderer.Contracts.Services;
-using UnsortedOrderer.Models;
 namespace UnsortedOrderer.Services;
 
 public sealed class PhotoService : IPhotoService
 {
+    private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
     private const int SmallImageMaxDimension = 512;
     private const long SmallImageMaxBytes = 300 * 1024;
     private const int DateTakenId = 0x9003; // PropertyTagExifDTOrig
+
+    public PhotoService(ICameraFileNamePatternService cameraFileNamePatternService)
+    {
+        _cameraFileNamePatternService = cameraFileNamePatternService;
+    }
 
     public bool IsPhoto(string filePath)
     {
@@ -38,13 +43,10 @@ public sealed class PhotoService : IPhotoService
     public string MovePhoto(
         string filePath,
         string destinationRoot,
-        string photosFolderName,
-        IReadOnlyCollection<DeviceBrandPattern> cameraPatterns)
+        string photosFolderName)
     {
         var date = GetPhotoDate(filePath);
-        var brandFolder = DeviceBrandMatcher.GetBrandByFileName(
-            Path.GetFileName(filePath),
-            cameraPatterns ?? Array.Empty<DeviceBrandPattern>());
+        var brandFolder = _cameraFileNamePatternService.GetBrandByFileName(Path.GetFileName(filePath));
         var photoDirectory = Path.Combine(
             destinationRoot,
             photosFolderName,

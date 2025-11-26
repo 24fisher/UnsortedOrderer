@@ -9,6 +9,5 @@ public interface IPhotoService
     string MovePhoto(
         string filePath,
         string destinationRoot,
-        string photosFolderName,
-        IReadOnlyCollection<DeviceBrandPattern> cameraPatterns);
+        string photosFolderName);
 }

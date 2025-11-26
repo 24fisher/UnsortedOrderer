@@ -30,7 +30,8 @@ public static class AppSettingsMapper
             Require(dto.UnknownFolderName, nameof(dto.UnknownFolderName)),
             dto.DeletedExtensions ?? Array.Empty<string>(),
             dto.DocumentImageKeywords ?? Array.Empty<string>(),
-            MapCameraFileNamePatterns(dto.CameraFileNamePatterns));
+            MapCameraFileNamePatterns(dto.CameraFileNamePatterns),
+            dto.SoftwareArchiveKeywords ?? Array.Empty<string>());
     }
 
     private static IReadOnlyCollection<DeviceBrandPattern> MapCameraFileNamePatterns(
@@ -57,7 +58,6 @@ public static class AppSettingsMapper
                     new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled));
             })
             .ToArray();
-            dto.SoftwareArchiveKeywords ?? Array.Empty<string>());
     }
 
     private static string Require(string? value, string name)
