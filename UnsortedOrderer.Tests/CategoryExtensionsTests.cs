@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using UnsortedOrderer.Categories;
+using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
+using UnsortedOrderer.Services;
 using Xunit;
 
 namespace UnsortedOrderer.Tests;
@@ -34,7 +37,7 @@ public class CategoryExtensionsTests
             new MusicalInstrumentsCategory("MusicalInstruments"),
             new EBooksCategory("EBooks"),
             new DocumentsCategory(),
-            new VideosCategory(Array.Empty<DeviceBrandPattern>()),
+            new VideosCategory(CreateVideoCameraFileNamePatternServices()),
             new ThreeDModelsCategory(),
             new ArchivesCategory("Archives"),
             new CertificatesCategory(),
@@ -44,6 +47,14 @@ public class CategoryExtensionsTests
             new RepositoriesCategory("Repositories"),
             new SoftCategory("Soft"),
             new UnknownCategory("Unknown"),
+        };
+    }
+
+    private static IEnumerable<ICameraFileNamePatternService> CreateVideoCameraFileNamePatternServices()
+    {
+        return new ICameraFileNamePatternService[]
+        {
+            new VideoCameraFileNamePatternService(Array.Empty<DeviceBrandPattern>())
         };
     }
 

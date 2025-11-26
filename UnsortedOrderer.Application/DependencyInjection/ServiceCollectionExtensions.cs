@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
@@ -14,13 +15,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(settings);
         services.AddSingleton<IArchiveService, ArchiveService>();
         services.AddSingleton<ICameraFileNamePatternService>(
-            _ => new CameraFileNamePatternService(settings.CameraFileNamePatterns));
+            _ => new PhotoCameraFileNamePatternService(settings.CameraFileNamePatterns));
+        services.AddSingleton<ICameraFileNamePatternService>(
+            _ => new VideoCameraFileNamePatternService(settings.CameraFileNamePatterns));
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
-            var cameraFileNamePatternService = provider.GetRequiredService<ICameraFileNamePatternService>();
+            var cameraFileNamePatternService = provider.GetRequiredService<IEnumerable<ICameraFileNamePatternService>>();
             return new IFileCategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),
