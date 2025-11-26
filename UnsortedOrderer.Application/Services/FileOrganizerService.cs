@@ -24,6 +24,7 @@ public sealed class FileOrganizerService
     private readonly UnknownCategory _unknownCategory;
     private readonly SpecialCategoriesHandler _specialCategoriesHandler;
     private readonly HashSet<string> _deletedExtensions;
+    private readonly string[] _softwareArchiveKeywords;
 
     public FileOrganizerService(
         AppSettings settings,
@@ -54,6 +55,10 @@ public sealed class FileOrganizerService
         _deletedExtensions = FileUtilities
             .NormalizeExtensions(settings.DeletedExtensions)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        _softwareArchiveKeywords = settings.SoftwareArchiveKeywords
+            .Where(keyword => !string.IsNullOrWhiteSpace(keyword))
+            .ToArray();
 
         _unknownCategory = _categories.OfType<UnknownCategory>().FirstOrDefault()
             ?? throw new InvalidOperationException("Unknown category is missing.");
@@ -191,6 +196,14 @@ public sealed class FileOrganizerService
     {
         RemoveExistingDistributionDirectory(filePath);
 
+        if (IsSoftwareArchive(filePath))
+        {
+            var softArchiveDestination = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName);
+            var movedArchive = _archiveService.HandleArchive(filePath, softArchiveDestination);
+            _statisticsService.RecordMovedFile(movedArchive, _settings.SoftFolderName);
+            return;
+        }
+
         var matchingCategory = FindMatchingSiblingCategory(filePath);
         if (matchingCategory is not null)
         {
@@ -272,6 +285,18 @@ public sealed class FileOrganizerService
         var unknownDirectory = Path.Combine(_settings.DestinationRoot, _unknownCategory.FolderName, extensionFolderName);
         var destination = FileUtilities.MoveFile(filePath, unknownDirectory);
         _statisticsService.RecordMovedFile(destination, _unknownCategory.FolderName);
+    }
+
+    private bool IsSoftwareArchive(string archivePath)
+    {
+        if (_softwareArchiveKeywords.Length == 0)
+        {
+            return false;
+        }
+
+        var archiveName = Path.GetFileNameWithoutExtension(archivePath) ?? string.Empty;
+        return _softwareArchiveKeywords.Any(keyword =>
+            archiveName.Contains(keyword, StringComparison.OrdinalIgnoreCase));
     }
 
     private void ValidateCategoryExtensions()
