@@ -1,6 +1,6 @@
 # UnsortedOrderer
 
-.NET 8 console application for organizing a folder full of unsorted files. Configuration lives in `UnsortedOrderer.ConsoleApp/appsettings.json`.
+.NET 8 console application for organizing a folder full of unsorted files. Configuration lives in `UnsortedOrderer.ConsoleApp/appsettings.json` (defaults point to `C:/_Unsorted` as the source and `C:/_Sorted` as the destination).
 
 ## Configuration
 
