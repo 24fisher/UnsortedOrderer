@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Application.Application;
 using UnsortedOrderer.Application.DependencyInjection;
 using UnsortedOrderer.Infrastructure.Mappers;

@@ -1,4 +1,6 @@
-namespace UnsortedOrderer.Services;
+using UnsortedOrderer.Contracts.Categories;
+
+namespace UnsortedOrderer.Contracts.Services;
 
 public interface IStatisticsService
 {

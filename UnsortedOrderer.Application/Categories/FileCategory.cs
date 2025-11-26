@@ -1,3 +1,5 @@
+using UnsortedOrderer.Contracts.Categories;
+
 namespace UnsortedOrderer.Categories;
 
 public abstract class FileCategory : IFileCategory

@@ -1,4 +1,5 @@
 using System.Drawing;
+using UnsortedOrderer.Contracts.Services;
 namespace UnsortedOrderer.Services;
 
 public sealed class PhotoService : IPhotoService
