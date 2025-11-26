@@ -1,4 +1,4 @@
-namespace UnsortedOrderer.Categories;
+namespace UnsortedOrderer.Contracts.Categories;
 
 public interface IFileCategory
 {

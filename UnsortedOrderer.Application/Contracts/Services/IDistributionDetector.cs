@@ -1,4 +1,4 @@
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Contracts.Services;
 
 public interface IDistributionDetector
 {

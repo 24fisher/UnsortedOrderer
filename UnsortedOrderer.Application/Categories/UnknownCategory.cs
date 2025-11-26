@@ -1,3 +1,5 @@
+using UnsortedOrderer.Contracts.Categories;
+
 namespace UnsortedOrderer.Categories;
 
 public sealed class UnknownCategory : IFileCategory

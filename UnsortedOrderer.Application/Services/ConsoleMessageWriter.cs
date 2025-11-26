@@ -1,4 +1,4 @@
-using UnsortedOrderer.Services;
+using UnsortedOrderer.Contracts.Services;
 
 namespace UnsortedOrderer.Services;
 

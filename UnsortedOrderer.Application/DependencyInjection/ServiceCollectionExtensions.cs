@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using UnsortedOrderer.Categories;
+using UnsortedOrderer.Contracts.Categories;
+using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
 

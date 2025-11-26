@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using UnsortedOrderer.Contracts.Services;
 namespace UnsortedOrderer.Services;
 
 public sealed class SoftwareDistributivesDetector : IDistributionDetector
