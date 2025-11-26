@@ -1,3 +1,4 @@
+using UnsortedOrderer.Cache;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 

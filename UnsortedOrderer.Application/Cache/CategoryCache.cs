@@ -1,7 +1,7 @@
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Cache;
 
 internal sealed class CategoryCache
 {
