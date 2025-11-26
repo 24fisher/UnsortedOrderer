@@ -36,12 +36,17 @@ public sealed class PhotoService : IPhotoService
 
     public string MovePhoto(string filePath, string destinationRoot, string photosFolderName)
     {
-        var year = GetPhotoYear(filePath);
-        var photoDirectory = Path.Combine(destinationRoot, photosFolderName, year.ToString());
+        var date = GetPhotoDate(filePath);
+        var photoDirectory = Path.Combine(
+            destinationRoot,
+            photosFolderName,
+            date.Year.ToString(),
+            date.Month.ToString("D2"));
+
         return FileUtilities.MoveFile(filePath, photoDirectory);
     }
 
-    private static int GetPhotoYear(string filePath)
+    private static DateTime GetPhotoDate(string filePath)
     {
         try
         {
@@ -52,7 +57,7 @@ public sealed class PhotoService : IPhotoService
                 var dateString = System.Text.Encoding.ASCII.GetString(propertyItem.Value).Trim('\0');
                 if (DateTime.TryParse(dateString, out var dateTaken))
                 {
-                    return dateTaken.Year;
+                    return dateTaken;
                 }
             }
         }
@@ -61,6 +66,6 @@ public sealed class PhotoService : IPhotoService
             // fall back to file timestamps
         }
 
-        return File.GetCreationTime(filePath).Year;
+        return File.GetCreationTime(filePath);
     }
 }
