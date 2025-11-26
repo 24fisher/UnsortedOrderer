@@ -13,67 +13,6 @@ namespace UnsortedOrderer.Tests;
 
 public class FileOrganizerServiceTests
 {
-    [Fact]
-    public void Images_are_moved_into_images_subfolder()
-    {
-        using var tempDirectory = new TempDirectory();
-
-        var sourceDirectory = Path.Combine(tempDirectory.Path, "Source");
-        var destinationRoot = Path.Combine(tempDirectory.Path, "Dest");
-        Directory.CreateDirectory(sourceDirectory);
-
-        var settings = new AppSettings(
-            sourceDirectory,
-            destinationRoot,
-            softFolderName: "Soft",
-            archiveFolderName: "Archives",
-            imagesFolderName: "Images",
-            photosFolderName: "Photos",
-            musicFolderName: "Music",
-            musicalInstrumentsFolderName: "Instruments",
-            eBooksFolderName: "EBooks",
-            repositoriesFolderName: "Repositories",
-            driversFolderName: "Drivers",
-            firmwareFolderName: "Firmware",
-            metadataFolderName: "Metadata",
-            unknownFolderName: "_Unknown",
-            deletedExtensions: Array.Empty<string>(),
-            documentImageKeywords: Array.Empty<string>(),
-            cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
-            softwareArchiveKeywords: Array.Empty<string>());
-
-        var imagePath = Path.Combine(sourceDirectory, "icon.png");
-        File.WriteAllBytes(imagePath, new byte[] { 1, 2, 3 });
-
-        var categories = new IFileCategory[]
-        {
-            new PhotosCategory(settings.PhotosFolderName),
-            new ImagesCategory(settings.ImagesFolderName),
-            new UnknownCategory(settings.UnknownFolderName)
-        };
-
-        var archiveService = new StubArchiveService();
-        var photoService = new StubPhotoService(isPhoto: false);
-        var statisticsService = new RecordingStatisticsService();
-        var messageWriter = new StubMessageWriter();
-
-        var organizer = new FileOrganizerService(
-            settings,
-            archiveService,
-            photoService,
-            categories,
-            statisticsService,
-            messageWriter);
-
-        InvokeProcessFile(organizer, imagePath);
-
-        var expectedDirectory = Path.Combine(destinationRoot, settings.ImagesFolderName, "images");
-        var expectedPath = Path.Combine(expectedDirectory, "icon.png");
-
-        Assert.True(File.Exists(expectedPath));
-        Assert.False(File.Exists(imagePath));
-        Assert.Contains(statisticsService.MovedFiles, entry => entry.destination == expectedPath && entry.category == settings.ImagesFolderName);
-    }
 
     private static void InvokeProcessFile(FileOrganizerService organizer, string filePath)
     {

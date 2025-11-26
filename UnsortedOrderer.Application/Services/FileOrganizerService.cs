@@ -146,7 +146,7 @@ public sealed class FileOrganizerService
                 _statisticsService.RecordMovedFile(photoDestination, category.FolderName);
                 break;
             case ImagesCategory:
-                var imagesDirectory = Path.Combine(_settings.DestinationRoot, category.FolderName, "images");
+                var imagesDirectory = Path.Combine(_settings.DestinationRoot, category.FolderName);
                 var imageDestination = FileUtilities.MoveFile(filePath, imagesDirectory);
                 _statisticsService.RecordMovedFile(imageDestination, category.FolderName);
                 break;
