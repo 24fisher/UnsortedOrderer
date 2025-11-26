@@ -33,4 +33,4 @@
 - При совпадении названия архива с уже перемещённой папкой ПО папка удаляется, а архив переносится на её место.
 - После обработки пустые директории удаляются.
 
-Запуск производится из корня репозитория командой `dotnet run --project UnsortedOrderer.ConsoleApp/UnsortedOrderer.csproj`, предварительно убедившись, что пути в `appsettings.json` корректны.
+Запуск производится из корня репозитория командой `dotnet run --project UnsortedOrderer.ConsoleApp/UnsortedOrderer.ConsoleApp.csproj`, предварительно убедившись, что пути в `appsettings.json` корректны.
