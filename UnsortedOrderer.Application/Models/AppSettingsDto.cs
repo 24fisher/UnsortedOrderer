@@ -35,4 +35,5 @@ public sealed class AppSettingsDto
     public string[]? DocumentImageKeywords { get; set; }
 
     public DeviceBrandPatternDto[]? CameraFileNamePatterns { get; set; }
+    public string[]? SoftwareArchiveKeywords { get; set; }
 }

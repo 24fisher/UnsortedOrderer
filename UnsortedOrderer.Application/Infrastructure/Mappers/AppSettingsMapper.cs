@@ -57,6 +57,7 @@ public static class AppSettingsMapper
                     new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled));
             })
             .ToArray();
+            dto.SoftwareArchiveKeywords ?? Array.Empty<string>());
     }
 
     private static string Require(string? value, string name)

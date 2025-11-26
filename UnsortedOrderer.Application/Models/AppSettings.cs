@@ -20,6 +20,7 @@ public sealed class AppSettings
         string[] deletedExtensions,
         string[] documentImageKeywords,
         IReadOnlyCollection<DeviceBrandPattern> cameraFileNamePatterns)
+        string[] softwareArchiveKeywords)
     {
         SourceDirectory = sourceDirectory;
         DestinationRoot = destinationRoot;
@@ -38,6 +39,7 @@ public sealed class AppSettings
         DeletedExtensions = deletedExtensions;
         DocumentImageKeywords = documentImageKeywords;
         CameraFileNamePatterns = cameraFileNamePatterns;
+        SoftwareArchiveKeywords = softwareArchiveKeywords;
     }
 
     public string SourceDirectory { get; }
@@ -73,4 +75,5 @@ public sealed class AppSettings
     public string[] DocumentImageKeywords { get; }
 
     public IReadOnlyCollection<DeviceBrandPattern> CameraFileNamePatterns { get; }
+    public string[] SoftwareArchiveKeywords { get; }
 }
