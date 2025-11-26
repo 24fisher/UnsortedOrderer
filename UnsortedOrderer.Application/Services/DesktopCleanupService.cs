@@ -1,9 +1,16 @@
+using System.Collections.Generic;
 using UnsortedOrderer.Contracts.Services;
 
 namespace UnsortedOrderer.Services;
 
 public sealed class DesktopCleanupService : IDesktopCleanupService
 {
+    private static readonly HashSet<string> ShortcutExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".lnk",
+        ".url",
+    };
+
     private readonly IMessageWriter _messageWriter;
 
     public DesktopCleanupService(IMessageWriter messageWriter)
@@ -91,8 +98,7 @@ public sealed class DesktopCleanupService : IDesktopCleanupService
 
     private static bool IsShortcut(FileSystemInfo entry)
     {
-        return entry is FileInfo fileInfo &&
-               string.Equals(fileInfo.Extension, ".lnk", StringComparison.OrdinalIgnoreCase);
+        return entry is FileInfo fileInfo && ShortcutExtensions.Contains(fileInfo.Extension);
     }
 
     private static bool IsCurrentProcess(string normalizedEntryPath, string? currentProcessPath)
