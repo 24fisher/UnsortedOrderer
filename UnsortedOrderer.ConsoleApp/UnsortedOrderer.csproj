@@ -12,6 +12,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include=".\\UnsortedOrderer.Core\\UnsortedOrderer.Core.csproj" />
+    <ProjectReference Include="..\\UnsortedOrderer.Core\\UnsortedOrderer.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
