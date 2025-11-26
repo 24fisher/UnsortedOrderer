@@ -13,11 +13,14 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton(settings);
         services.AddSingleton<IArchiveService, ArchiveService>();
+        services.AddSingleton<ICameraFileNamePatternService>(
+            _ => new CameraFileNamePatternService(settings.CameraFileNamePatterns));
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
+            var cameraFileNamePatternService = provider.GetRequiredService<ICameraFileNamePatternService>();
             return new IFileCategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),
@@ -26,7 +29,7 @@ public static class ServiceCollectionExtensions
                 new MusicalInstrumentsCategory(appSettings.MusicalInstrumentsFolderName),
                 new EBooksCategory(appSettings.EBooksFolderName),
                 new DocumentsCategory(),
-                new VideosCategory(appSettings.CameraFileNamePatterns),
+                new VideosCategory(cameraFileNamePatternService),
                 new ThreeDModelsCategory(),
                 new ArchivesCategory(appSettings.ArchiveFolderName),
                 new CertificatesCategory(),

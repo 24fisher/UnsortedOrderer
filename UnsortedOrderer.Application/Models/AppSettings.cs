@@ -19,7 +19,7 @@ public sealed class AppSettings
         string unknownFolderName,
         string[] deletedExtensions,
         string[] documentImageKeywords,
-        IReadOnlyCollection<DeviceBrandPattern> cameraFileNamePatterns)
+        IReadOnlyCollection<DeviceBrandPattern> cameraFileNamePatterns,
         string[] softwareArchiveKeywords)
     {
         SourceDirectory = sourceDirectory;

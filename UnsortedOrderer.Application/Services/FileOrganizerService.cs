@@ -142,8 +142,7 @@ public sealed class FileOrganizerService
                 var photoDestination = _photoService.MovePhoto(
                     filePath,
                     _settings.DestinationRoot,
-                    _settings.PhotosFolderName,
-                    _settings.CameraFileNamePatterns);
+                    _settings.PhotosFolderName);
                 _statisticsService.RecordMovedFile(photoDestination, category.FolderName);
                 break;
             case ImagesCategory:

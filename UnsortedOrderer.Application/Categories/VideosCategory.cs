@@ -1,5 +1,5 @@
 using UnsortedOrderer.Contracts.Categories;
-using UnsortedOrderer.Models;
+using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Services;
 
 namespace UnsortedOrderer.Categories;
@@ -11,12 +11,12 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
         ".mp4", ".mov", ".avi", ".mkv", ".wmv", ".flv", ".webm", ".mpeg"
     ];
 
-    private readonly IReadOnlyCollection<DeviceBrandPattern> _cameraPatterns;
+    private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
 
-    public VideosCategory(IReadOnlyCollection<DeviceBrandPattern> cameraPatterns)
+    public VideosCategory(ICameraFileNamePatternService cameraFileNamePatternService)
         : base("Videos", "Videos", VideoExtensions)
     {
-        _cameraPatterns = cameraPatterns ?? Array.Empty<DeviceBrandPattern>();
+        _cameraFileNamePatternService = cameraFileNamePatternService;
     }
 
     public bool IsNonSplittableDirectory(string path)
@@ -47,7 +47,7 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
             return null;
         }
 
-        return DeviceBrandMatcher.GetBrandByFileName(fileName, _cameraPatterns);
+        return _cameraFileNamePatternService.GetBrandByFileName(fileName);
     }
 
     private static int GetVideoYear(string filePath)
