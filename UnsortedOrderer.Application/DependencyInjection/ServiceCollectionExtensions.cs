@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using UnsortedOrderer.Application.Application;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
