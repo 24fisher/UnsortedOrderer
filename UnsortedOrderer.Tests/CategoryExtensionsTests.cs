@@ -1,4 +1,5 @@
 using UnsortedOrderer.Categories;
+using UnsortedOrderer.Models;
 using Xunit;
 
 namespace UnsortedOrderer.Tests;
@@ -33,7 +34,7 @@ public class CategoryExtensionsTests
             new MusicalInstrumentsCategory("MusicalInstruments"),
             new EBooksCategory("EBooks"),
             new DocumentsCategory(),
-            new VideosCategory(),
+            new VideosCategory(Array.Empty<DeviceBrandPattern>()),
             new ThreeDModelsCategory(),
             new ArchivesCategory("Archives"),
             new CertificatesCategory(),

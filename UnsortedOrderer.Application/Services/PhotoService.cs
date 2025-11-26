@@ -1,5 +1,6 @@
 using System.Drawing;
 using UnsortedOrderer.Contracts.Services;
+using UnsortedOrderer.Models;
 namespace UnsortedOrderer.Services;
 
 public sealed class PhotoService : IPhotoService
@@ -34,14 +35,26 @@ public sealed class PhotoService : IPhotoService
         return new FileInfo(filePath).Length > SmallImageMaxBytes;
     }
 
-    public string MovePhoto(string filePath, string destinationRoot, string photosFolderName)
+    public string MovePhoto(
+        string filePath,
+        string destinationRoot,
+        string photosFolderName,
+        IReadOnlyCollection<DeviceBrandPattern> cameraPatterns)
     {
         var date = GetPhotoDate(filePath);
+        var brandFolder = DeviceBrandMatcher.GetBrandByFileName(
+            Path.GetFileName(filePath),
+            cameraPatterns ?? Array.Empty<DeviceBrandPattern>());
         var photoDirectory = Path.Combine(
             destinationRoot,
             photosFolderName,
             date.Year.ToString(),
             date.Month.ToString("D2"));
+
+        if (!string.IsNullOrWhiteSpace(brandFolder))
+        {
+            photoDirectory = Path.Combine(photoDirectory, brandFolder);
+        }
 
         return FileUtilities.MoveFile(filePath, photoDirectory);
     }

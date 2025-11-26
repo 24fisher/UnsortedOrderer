@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
                 new MusicalInstrumentsCategory(appSettings.MusicalInstrumentsFolderName),
                 new EBooksCategory(appSettings.EBooksFolderName),
                 new DocumentsCategory(),
-                new VideosCategory(),
+                new VideosCategory(appSettings.CameraFileNamePatterns),
                 new ThreeDModelsCategory(),
                 new ArchivesCategory(appSettings.ArchiveFolderName),
                 new CertificatesCategory(),

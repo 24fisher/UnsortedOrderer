@@ -134,7 +134,11 @@ public sealed class FileOrganizerService
         switch (category)
         {
             case PhotosCategory:
-                var photoDestination = _photoService.MovePhoto(filePath, _settings.DestinationRoot, _settings.PhotosFolderName);
+                var photoDestination = _photoService.MovePhoto(
+                    filePath,
+                    _settings.DestinationRoot,
+                    _settings.PhotosFolderName,
+                    _settings.CameraFileNamePatterns);
                 _statisticsService.RecordMovedFile(photoDestination, category.FolderName);
                 break;
             case ImagesCategory:
