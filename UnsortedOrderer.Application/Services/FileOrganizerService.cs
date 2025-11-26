@@ -211,9 +211,13 @@ public sealed class FileOrganizerService
 
     private void MoveNonSplittableDirectory(string directory, INonSplittableDirectoryCategory category)
     {
-        var destinationPath = category.GetDirectoryDestination(_settings.DestinationRoot, directory);
-        var fileCount = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Count();
-        Directory.Move(directory, destinationPath);
+        var sourceDirectory = category is RepositoriesCategory repositoriesCategory
+            ? repositoriesCategory.GetRepositoryRoot(directory) ?? directory
+            : directory;
+
+        var destinationPath = category.GetDirectoryDestination(_settings.DestinationRoot, sourceDirectory);
+        var fileCount = Directory.EnumerateFiles(sourceDirectory, "*", SearchOption.AllDirectories).Count();
+        Directory.Move(sourceDirectory, destinationPath);
 
         _statisticsService.RecordMovedNonSplittableDirectory(category, destinationPath, fileCount);
     }

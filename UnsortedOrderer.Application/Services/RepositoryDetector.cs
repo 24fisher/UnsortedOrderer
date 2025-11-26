@@ -60,6 +60,37 @@ public sealed class RepositoryDetector
         return ContainsEnoughCodeFiles(path);
     }
 
+    public string? FindRepositoryRoot(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            return null;
+        }
+
+        var current = path;
+        string? repositoryPath = null;
+
+        while (true)
+        {
+            if (IsRepositoryDirectory(current))
+            {
+                repositoryPath = current;
+            }
+
+            var subDirectories = Directory.GetDirectories(current);
+            var hasTopLevelFiles = Directory.EnumerateFiles(current, "*", SearchOption.TopDirectoryOnly).Any();
+
+            if (subDirectories.Length != 1 || hasTopLevelFiles)
+            {
+                break;
+            }
+
+            current = subDirectories[0];
+        }
+
+        return repositoryPath;
+    }
+
     private static string NormalizeExtension(string extension)
     {
         return extension.StartsWith('.')
