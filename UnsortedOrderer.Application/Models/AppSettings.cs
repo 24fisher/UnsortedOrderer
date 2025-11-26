@@ -19,6 +19,7 @@ public sealed class AppSettings
         string unknownFolderName,
         string[] deletedExtensions,
         string[] documentImageKeywords,
+        IReadOnlyCollection<DeviceBrandPattern> cameraFileNamePatterns)
         string[] softwareArchiveKeywords)
     {
         SourceDirectory = sourceDirectory;
@@ -37,6 +38,7 @@ public sealed class AppSettings
         UnknownFolderName = unknownFolderName;
         DeletedExtensions = deletedExtensions;
         DocumentImageKeywords = documentImageKeywords;
+        CameraFileNamePatterns = cameraFileNamePatterns;
         SoftwareArchiveKeywords = softwareArchiveKeywords;
     }
 
@@ -72,5 +74,6 @@ public sealed class AppSettings
 
     public string[] DocumentImageKeywords { get; }
 
+    public IReadOnlyCollection<DeviceBrandPattern> CameraFileNamePatterns { get; }
     public string[] SoftwareArchiveKeywords { get; }
 }
