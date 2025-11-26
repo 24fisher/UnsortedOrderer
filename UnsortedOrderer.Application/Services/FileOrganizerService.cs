@@ -71,14 +71,26 @@ public sealed class FileOrganizerService
 
     public void Organize()
     {
+        var createdSourceDirectory = false;
         if (!Directory.Exists(_settings.SourceDirectory))
         {
-            _messageWriter.WriteLine($"Source directory '{_settings.SourceDirectory}' does not exist.");
-            return;
+            Directory.CreateDirectory(_settings.SourceDirectory);
+            createdSourceDirectory = true;
+            _messageWriter.WriteLine($"Created missing source directory at '{_settings.SourceDirectory}'.");
         }
 
+        var createdDestinationDirectory = !Directory.Exists(_settings.DestinationRoot);
         Directory.CreateDirectory(_settings.DestinationRoot);
-        _messageWriter.WriteLine($"Ensured destination root exists at '{_settings.DestinationRoot}'.");
+
+        var destinationMessage = createdDestinationDirectory
+            ? $"Created destination root at '{_settings.DestinationRoot}'."
+            : $"Ensured destination root exists at '{_settings.DestinationRoot}'.";
+        _messageWriter.WriteLine(destinationMessage);
+
+        if (createdSourceDirectory)
+        {
+            _messageWriter.WriteLine("Source directory was created and is currently empty. Press any key to continue scanning.");
+        }
 
         _messageWriter.WriteLine("Press any key to start file scan...");
         Console.ReadKey(intercept: true);
