@@ -1,3 +1,4 @@
+using System.IO;
 using UnsortedOrderer.Models;
 
 namespace UnsortedOrderer.Services;
@@ -11,9 +12,12 @@ public static class DeviceBrandMatcher
             return null;
         }
 
+        var fileNameWithoutPath = Path.GetFileName(fileName);
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileNameWithoutPath);
+
         foreach (var pattern in patterns)
         {
-            if (pattern.Pattern.IsMatch(fileName))
+            if (pattern.Pattern.IsMatch(fileNameWithoutPath) || pattern.Pattern.IsMatch(fileNameWithoutExtension))
             {
                 return pattern.Brand;
             }
