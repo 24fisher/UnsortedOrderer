@@ -1,7 +1,6 @@
 using System.Linq;
 using MetadataExtractor;
 using MetadataExtractor.Formats.FileSystem;
-using MetadataExtractor.Formats.Mp4;
 using MetadataExtractor.Formats.QuickTime;
 using UnsortedOrderer.Contracts.Services;
 
@@ -55,12 +54,6 @@ public sealed class VideoDateService : IVideoDateService
 
             var quickTimeDirectory = directories.OfType<QuickTimeDirectory>().FirstOrDefault();
             if (TryGetDate(quickTimeDirectory, QuickTimeDirectory.TagCreationTime, out creationDate))
-            {
-                return creationDate;
-            }
-
-            var mp4Directory = directories.OfType<Mp4Directory>().FirstOrDefault();
-            if (TryGetDate(mp4Directory, Mp4Directory.TagCreationTime, out creationDate))
             {
                 return creationDate;
             }
