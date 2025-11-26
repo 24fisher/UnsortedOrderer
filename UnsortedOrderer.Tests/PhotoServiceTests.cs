@@ -68,6 +68,26 @@ public class PhotoServiceTests
     }
 
     [Fact]
+    public void MovePhoto_uses_creation_date_when_exif_before_1980()
+    {
+        using var tempDirectory = new TempDirectory();
+        var destinationRoot = Path.Combine(tempDirectory.Path, "Dest");
+        var exifDate = new DateTime(1970, 2, 3, 4, 5, 6);
+        var creationDate = new DateTime(2024, 1, 1);
+        var photoPath = CreateImageWithExifDate(tempDirectory.Path, exifDate, creationDate);
+
+        var metadataService = new StubPhotoCameraMetadataService(null);
+        var patternService = new StubCameraPatternService(CameraMediaType.Photo, null);
+        var messengerService = new StubMessengerPathService(null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService, messengerService);
+
+        var destination = photoService.MovePhoto(photoPath, destinationRoot, "Photos");
+
+        Assert.Contains(Path.Combine(destinationRoot, "Photos", "2024", "01"), destination);
+        Assert.DoesNotContain(Path.Combine(destinationRoot, "Photos", "1970", "02"), destination);
+    }
+
+    [Fact]
     public void MovePhoto_places_telegram_photos_under_messenger_folder()
     {
         using var tempDirectory = new TempDirectory();

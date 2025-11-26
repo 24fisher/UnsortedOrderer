@@ -110,6 +110,11 @@ public sealed class PhotoService : IPhotoService
                 var dateString = System.Text.Encoding.ASCII.GetString(propertyItem.Value).Trim('\0');
                 if (TryParseDateTaken(dateString, out var dateTaken))
                 {
+                    if (dateTaken.Year < 1980)
+                    {
+                        return File.GetCreationTime(filePath);
+                    }
+
                     return dateTaken;
                 }
             }
