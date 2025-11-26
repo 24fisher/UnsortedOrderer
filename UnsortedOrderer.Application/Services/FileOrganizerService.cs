@@ -9,6 +9,7 @@ public sealed class FileOrganizerService
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
     private readonly IMessageWriter _messageWriter;
+    private readonly IStatisticsService _statisticsService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
@@ -19,26 +20,20 @@ public sealed class FileOrganizerService
     private readonly CategoryCache _categoryCache;
     private readonly UnknownCategory _unknownCategory;
     private readonly SpecialCategoriesHandler _specialCategoriesHandler;
-    private readonly Dictionary<string, int> _movedFilesByCategory = new(StringComparer.OrdinalIgnoreCase);
-    private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, int> _deletedFilesByExtension = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _deletedExtensions;
-    private readonly List<NonSplittableDirectoryRecord> _movedNonSplittableDirectories = new();
-    private int _totalMovedFiles;
-    private int _totalUnknownFiles;
-    private int _totalDeletedFiles;
 
     public FileOrganizerService(
         AppSettings settings,
         IArchiveService archiveService,
         IPhotoService photoService,
         IEnumerable<IFileCategory> categories,
+        IStatisticsService statisticsService,
         IMessageWriter messageWriter)
     {
         _settings = settings;
         _archiveService = archiveService;
         _photoService = photoService;
+        _statisticsService = statisticsService;
         _messageWriter = messageWriter;
         _categories = categories.ToArray();
         _nonSplittableCategories = _categories.OfType<INonSplittableDirectoryCategory>().ToArray();
@@ -61,11 +56,6 @@ public sealed class FileOrganizerService
             ?? throw new InvalidOperationException("Unknown category is missing.");
 
         ValidateCategoryExtensions();
-
-        foreach (var category in _categories)
-        {
-            _movedFilesByCategory[category.FolderName] = 0;
-        }
     }
 
     public void Organize()
@@ -112,7 +102,7 @@ public sealed class FileOrganizerService
 
             if (IsDirectoryEmpty(subDirectory))
             {
-                RecordDeletedDirectory(subDirectory);
+                _statisticsService.RecordDeletedDirectory(subDirectory);
                 Directory.Delete(subDirectory, recursive: false);
             }
         }
@@ -124,7 +114,7 @@ public sealed class FileOrganizerService
 
         if (_deletedExtensions.Contains(extension))
         {
-            RecordDeletedFile(extension);
+            _statisticsService.RecordDeletedFile(extension);
             File.Delete(filePath);
             return;
         }
@@ -133,7 +123,7 @@ public sealed class FileOrganizerService
             ?? ResolveCategory(filePath, extension);
         if (category is null)
         {
-            RecordUnknownFile(extension);
+            _statisticsService.RecordUnknownFile(extension);
             MoveToUnknown(filePath, extension);
             return;
         }
@@ -142,11 +132,11 @@ public sealed class FileOrganizerService
         {
             case PhotosCategory:
                 var photoDestination = _photoService.MovePhoto(filePath, _settings.DestinationRoot, _settings.PhotosFolderName);
-                RecordMovedFile(photoDestination, category.FolderName);
+                _statisticsService.RecordMovedFile(photoDestination, category.FolderName);
                 break;
             case ImagesCategory:
                 var imageDestination = FileUtilities.MoveFile(filePath, Path.Combine(_settings.DestinationRoot, category.FolderName));
-                RecordMovedFile(imageDestination, category.FolderName);
+                _statisticsService.RecordMovedFile(imageDestination, category.FolderName);
                 break;
             case ArchivesCategory:
                 HandleArchiveFile(filePath, category.FolderName);
@@ -156,7 +146,7 @@ public sealed class FileOrganizerService
                     ? nonSplittableCategory.GetFileDestination(_settings.DestinationRoot, filePath)
                     : Path.Combine(_settings.DestinationRoot, category.FolderName);
                 var destination = FileUtilities.MoveFile(filePath, destinationDirectory);
-                RecordMovedFile(destination, category.FolderName);
+                _statisticsService.RecordMovedFile(destination, category.FolderName);
                 break;
         }
     }
@@ -191,7 +181,7 @@ public sealed class FileOrganizerService
         var fileCount = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).Count();
         Directory.Move(directory, destinationPath);
 
-        RecordMovedNonSplittableDirectory(category, destinationPath, fileCount);
+        _statisticsService.RecordMovedNonSplittableDirectory(category, destinationPath, fileCount);
     }
 
     private void HandleArchiveFile(string filePath, string categoryName)
@@ -203,13 +193,13 @@ public sealed class FileOrganizerService
         {
             var matchingDestinationDirectory = Path.Combine(_settings.DestinationRoot, matchingCategory.FolderName);
             var matchingArchiveDestination = _archiveService.HandleArchive(filePath, matchingDestinationDirectory);
-            RecordMovedFile(matchingArchiveDestination, matchingCategory.FolderName);
+            _statisticsService.RecordMovedFile(matchingArchiveDestination, matchingCategory.FolderName);
             return;
         }
 
         var archiveDestinationDirectory = Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName);
         var archiveDestination = _archiveService.HandleArchive(filePath, archiveDestinationDirectory);
-        RecordMovedFile(archiveDestination, categoryName);
+        _statisticsService.RecordMovedFile(archiveDestination, categoryName);
     }
 
     private void RemoveExistingDistributionDirectory(string archivePath)
@@ -218,7 +208,7 @@ public sealed class FileOrganizerService
         var potentialDistributionDirectory = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName, archiveName);
         if (Directory.Exists(potentialDistributionDirectory))
         {
-            RecordDeletedDirectory(potentialDistributionDirectory);
+            _statisticsService.RecordDeletedDirectory(potentialDistributionDirectory);
             Directory.Delete(potentialDistributionDirectory, recursive: true);
         }
     }
@@ -257,7 +247,7 @@ public sealed class FileOrganizerService
             CleanEmptyDirectories(directory);
             if (IsDirectoryEmpty(directory))
             {
-                RecordDeletedDirectory(directory);
+                _statisticsService.RecordDeletedDirectory(directory);
                 Directory.Delete(directory, recursive: false);
             }
         }
@@ -268,86 +258,17 @@ public sealed class FileOrganizerService
         return !Directory.EnumerateFileSystemEntries(path).Any();
     }
 
-    private void RecordMovedFile(string destinationPath, string category)
-    {
-        RecordMovedFiles(1, category);
-
-        _messageWriter.WriteLine($"Moved to '{destinationPath}' (category: {category}).");
-    }
-
-    private void RecordMovedFiles(int count, string category)
-    {
-        _totalMovedFiles += count;
-        if (_movedFilesByCategory.ContainsKey(category))
-        {
-            _movedFilesByCategory[category] += count;
-        }
-        else
-        {
-            _movedFilesByCategory[category] = count;
-        }
-    }
-
-    private void RecordMovedNonSplittableDirectory(
-        INonSplittableDirectoryCategory category,
-        string destinationPath,
-        int fileCount)
-    {
-        _movedNonSplittableDirectories.Add(new NonSplittableDirectoryRecord(destinationPath, category.FolderName, fileCount));
-        RecordMovedFiles(fileCount, category.FolderName);
-
-        _messageWriter.WriteLine($"Moved directory '{destinationPath}' (category: {category.FolderName}, files: {fileCount}).");
-    }
-
-    private void RecordDeletedDirectory(string directory)
-    {
-        if (_deletedDirectories.Add(directory))
-        {
-            _messageWriter.WriteLine($"Deleted directory: {directory}");
-        }
-    }
-
-    private void RecordUnknownFile(string extension)
-    {
-        _totalUnknownFiles++;
-        var key = string.IsNullOrWhiteSpace(extension) ? "(no extension)" : extension;
-
-        if (_unknownExtensions.ContainsKey(key))
-        {
-            _unknownExtensions[key]++;
-        }
-        else
-        {
-            _unknownExtensions[key] = 1;
-        }
-    }
-
     private void MoveToUnknown(string filePath, string extension)
     {
         var extensionFolderName = string.IsNullOrWhiteSpace(extension)
             ? "no-extension"
             : extension.TrimStart('.')
                 .Replace(Path.DirectorySeparatorChar, '-')
-                .Replace(Path.AltDirectorySeparatorChar, '-');
+            .Replace(Path.AltDirectorySeparatorChar, '-');
 
         var unknownDirectory = Path.Combine(_settings.DestinationRoot, _unknownCategory.FolderName, extensionFolderName);
         var destination = FileUtilities.MoveFile(filePath, unknownDirectory);
-        RecordMovedFile(destination, _unknownCategory.FolderName);
-    }
-
-    private void RecordDeletedFile(string extension)
-    {
-        _totalDeletedFiles++;
-        var key = string.IsNullOrWhiteSpace(extension) ? "(no extension)" : extension;
-
-        if (_deletedFilesByExtension.ContainsKey(key))
-        {
-            _deletedFilesByExtension[key]++;
-        }
-        else
-        {
-            _deletedFilesByExtension[key] = 1;
-        }
+        _statisticsService.RecordMovedFile(destination, _unknownCategory.FolderName);
     }
 
     private void ValidateCategoryExtensions()
@@ -394,97 +315,6 @@ public sealed class FileOrganizerService
 
     private void PrintStatistics()
     {
-        _messageWriter.WriteLine(string.Empty);
-        _messageWriter.WriteLine("Organization summary:");
-        _messageWriter.WriteLine($"Total files moved: {_totalMovedFiles}");
-
-        foreach (var category in _categories.OrderBy(c => c.FolderName, StringComparer.OrdinalIgnoreCase))
-        {
-            var movedCount = _movedFilesByCategory.TryGetValue(category.FolderName, out var count)
-                ? count
-                : 0;
-            _messageWriter.WriteLine($"  {category.FolderName}: {movedCount}");
-        }
-
-        if (_unknownExtensions.Count == 0)
-        {
-            _messageWriter.WriteLine("Unknown file types: none");
-        }
-        else
-        {
-            _messageWriter.WriteLine($"Unknown file types encountered: {_totalUnknownFiles}");
-            foreach (var unknown in _unknownExtensions.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
-            {
-                _messageWriter.WriteLine($"  {unknown.Key}: {unknown.Value}");
-            }
-        }
-
-        PrintDeletedFilesByExtension();
-
-        PrintNonSplittableDirectories();
-
-        if (_deletedDirectories.Count == 0)
-        {
-            _messageWriter.WriteLine("Deleted directories: none");
-            return;
-        }
-
-        _messageWriter.WriteLine("Deleted directories:");
-        foreach (var directory in _deletedDirectories.OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
-        {
-            _messageWriter.WriteLine($"  {directory}");
-        }
-
-        PrintSourceDirectoryCompletion();
+        _statisticsService.PrintStatistics(_settings.SourceDirectory);
     }
-
-    private void PrintDeletedFilesByExtension()
-    {
-        var filteredDeleted = _deletedFilesByExtension
-            .Where(kvp => !kvp.Key.Equals(".tmp", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
-
-        if (_totalDeletedFiles == 0 || filteredDeleted.Length == 0)
-        {
-            _messageWriter.WriteLine("Deleted uncategorized files: none");
-            return;
-        }
-
-        _messageWriter.WriteLine($"Deleted uncategorized files: {filteredDeleted.Sum(kvp => kvp.Value)}");
-        foreach (var deleted in filteredDeleted.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
-        {
-            _messageWriter.WriteLine($"  {deleted.Key}: {deleted.Value}");
-        }
-    }
-
-    private void PrintSourceDirectoryCompletion()
-    {
-        if (!IsDirectoryEmpty(_settings.SourceDirectory))
-        {
-            return;
-        }
-
-        _messageWriter.WriteLine(string.Empty);
-        _messageWriter.WriteLine("====================");
-        _messageWriter.WriteLine("Source directory fully processed. No files remain to organize.");
-        _messageWriter.WriteLine("====================");
-    }
-
-    private void PrintNonSplittableDirectories()
-    {
-        if (_movedNonSplittableDirectories.Count == 0)
-        {
-            _messageWriter.WriteLine("Non-splittable directories moved: none");
-            return;
-        }
-
-        _messageWriter.WriteLine("Non-splittable directories moved:");
-        foreach (var record in _movedNonSplittableDirectories
-                     .OrderBy(r => r.Destination, StringComparer.OrdinalIgnoreCase))
-        {
-            _messageWriter.WriteLine($"  {record.Destination} ({record.FileCount} files)");
-        }
-    }
-
-    private sealed record NonSplittableDirectoryRecord(string Destination, string Category, int FileCount);
 }
