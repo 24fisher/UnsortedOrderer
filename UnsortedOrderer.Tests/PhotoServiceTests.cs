@@ -19,7 +19,8 @@ public class PhotoServiceTests
 
         var metadataService = new StubPhotoCameraMetadataService("Canon EOS 80D");
         var patternService = new StubCameraPatternService(CameraMediaType.Photo, "PatternBrand");
-        var photoService = new PhotoService(new[] { patternService }, metadataService);
+        var messengerService = new StubMessengerPathService(null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService, messengerService);
 
         var destination = photoService.MovePhoto(photoPath, destinationRoot, "Photos");
 
@@ -37,7 +38,8 @@ public class PhotoServiceTests
 
         var metadataService = new StubPhotoCameraMetadataService(null);
         var patternService = new StubCameraPatternService(CameraMediaType.Photo, "PatternBrand");
-        var photoService = new PhotoService(new[] { patternService }, metadataService);
+        var messengerService = new StubMessengerPathService(null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService, messengerService);
 
         var destination = photoService.MovePhoto(photoPath, destinationRoot, "Photos");
 
@@ -56,12 +58,31 @@ public class PhotoServiceTests
 
         var metadataService = new StubPhotoCameraMetadataService(null);
         var patternService = new StubCameraPatternService(CameraMediaType.Photo, null);
-        var photoService = new PhotoService(new[] { patternService }, metadataService);
+        var messengerService = new StubMessengerPathService(null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService, messengerService);
 
         var destination = photoService.MovePhoto(photoPath, destinationRoot, "Photos");
 
         Assert.Contains(Path.Combine(destinationRoot, "Photos", "2020", "02"), destination);
         Assert.DoesNotContain(Path.Combine(destinationRoot, "Photos", "2024", "01"), destination);
+    }
+
+    [Fact]
+    public void MovePhoto_places_telegram_photos_under_messenger_folder()
+    {
+        using var tempDirectory = new TempDirectory();
+        var destinationRoot = Path.Combine(tempDirectory.Path, "Dest");
+        var creationDate = new DateTime(2022, 7, 8);
+        var photoPath = CreateImage(tempDirectory.Path, creationDate);
+
+        var metadataService = new StubPhotoCameraMetadataService(null);
+        var patternService = new StubCameraPatternService(CameraMediaType.Photo, null);
+        var messengerService = new StubMessengerPathService("_Telegram");
+        var photoService = new PhotoService(new[] { patternService }, metadataService, messengerService);
+
+        var destination = photoService.MovePhoto(photoPath, destinationRoot, "Photos");
+
+        Assert.Contains(Path.Combine(destinationRoot, "Photos", "_Telegram", "2022", "07"), destination);
     }
 
     [Fact]
@@ -96,7 +117,8 @@ public class PhotoServiceTests
         using var tempDirectory = new TempDirectory();
         var metadataService = new StubPhotoCameraMetadataService(null);
         var patternService = new StubCameraPatternService(CameraMediaType.Photo, null);
-        var photoService = new PhotoService(new[] { patternService }, metadataService);
+        var messengerService = new StubMessengerPathService(null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService, messengerService);
         var imagePath = CreateLargeImage(tempDirectory.Path, extension, format);
 
         var result = photoService.IsPhoto(imagePath);
@@ -187,6 +209,21 @@ public class PhotoServiceTests
         private readonly string? _folder;
 
         public string? GetCameraFolder(string filePath)
+        {
+            return _folder;
+        }
+    }
+
+    private sealed class StubMessengerPathService : IMessengerPathService
+    {
+        public StubMessengerPathService(string? folder)
+        {
+            _folder = folder;
+        }
+
+        private readonly string? _folder;
+
+        public string? GetMessengerFolder(string filePath)
         {
             return _folder;
         }
