@@ -46,6 +46,25 @@ public class PhotoServiceTests
     }
 
     [Fact]
+    public void MovePhoto_prefers_exif_date_taken_over_creation_time()
+    {
+        using var tempDirectory = new TempDirectory();
+        var destinationRoot = Path.Combine(tempDirectory.Path, "Dest");
+        var exifDate = new DateTime(2020, 2, 3, 4, 5, 6);
+        var creationDate = new DateTime(2024, 1, 1);
+        var photoPath = CreateImageWithExifDate(tempDirectory.Path, exifDate, creationDate);
+
+        var metadataService = new StubPhotoCameraMetadataService(null);
+        var patternService = new StubCameraPatternService(CameraMediaType.Photo, null);
+        var photoService = new PhotoService(new[] { patternService }, metadataService);
+
+        var destination = photoService.MovePhoto(photoPath, destinationRoot, "Photos");
+
+        Assert.Contains(Path.Combine(destinationRoot, "Photos", "2020", "02"), destination);
+        Assert.DoesNotContain(Path.Combine(destinationRoot, "Photos", "2024", "01"), destination);
+    }
+
+    [Fact]
     public void Metadata_service_reads_make_and_model_from_exif()
     {
         using var tempDirectory = new TempDirectory();
@@ -104,6 +123,19 @@ public class PhotoServiceTests
         SetAsciiProperty(bitmap, 0x010F, make); // Make
         SetAsciiProperty(bitmap, 0x0110, model); // Model
         bitmap.Save(path, ImageFormat.Jpeg);
+
+        return path;
+    }
+
+    private static string CreateImageWithExifDate(string directory, DateTime dateTaken, DateTime creationDate)
+    {
+        var path = Path.Combine(directory, $"{Guid.NewGuid():N}.jpg");
+        using var bitmap = new Bitmap(4, 4);
+        SetAsciiProperty(bitmap, 0x9003, dateTaken.ToString("yyyy:MM:dd HH:mm:ss")); // DateTaken
+        bitmap.Save(path, ImageFormat.Jpeg);
+
+        File.SetCreationTime(path, creationDate);
+        File.SetLastWriteTime(path, creationDate);
 
         return path;
     }
