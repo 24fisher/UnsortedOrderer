@@ -1,6 +1,6 @@
 using UnsortedOrderer.Services;
 
-namespace UnsortedOrderer.Infrastructure.Services;
+namespace UnsortedOrderer.Services;
 
 public sealed class ConsoleMessageWriter : IMessageWriter
 {

@@ -3,11 +3,11 @@ using UnsortedOrderer.Categories;
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
 
-namespace UnsortedOrderer.Core.DependencyInjection;
+namespace UnsortedOrderer.Application.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddUnsortedOrdererCore(this IServiceCollection services, AppSettings settings)
+    public static IServiceCollection AddUnsortedOrdererApplication(this IServiceCollection services, AppSettings settings)
     {
         services.AddSingleton(settings);
         services.AddSingleton<IArchiveService, ArchiveService>();

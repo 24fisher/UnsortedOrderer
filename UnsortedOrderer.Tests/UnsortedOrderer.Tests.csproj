@@ -17,6 +17,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\\UnsortedOrderer.Core\\UnsortedOrderer.Core.csproj" />
+    <ProjectReference Include="..\\UnsortedOrderer.Application\\UnsortedOrderer.Application.csproj" />
   </ItemGroup>
 </Project>
