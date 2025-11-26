@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Drawing;
 using System.Linq;
 using UnsortedOrderer.Contracts.Services;
@@ -12,6 +13,12 @@ public sealed class PhotoService : IPhotoService
     private const int SmallImageMaxDimension = 512;
     private const long SmallImageMaxBytes = 300 * 1024;
     private const int DateTakenId = 0x9003; // PropertyTagExifDTOrig
+    private static readonly string[] ExifDateFormats =
+    [
+        "yyyy:MM:dd HH:mm:ss",
+        "yyyy:MM:dd HH:mm:ssK",
+        "yyyy:MM:dd HH:mm:sszzz"
+    ];
 
     public PhotoService(
         IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices,
@@ -88,7 +95,7 @@ public sealed class PhotoService : IPhotoService
             if (propertyItem is not null)
             {
                 var dateString = System.Text.Encoding.ASCII.GetString(propertyItem.Value).Trim('\0');
-                if (DateTime.TryParse(dateString, out var dateTaken))
+                if (TryParseDateTaken(dateString, out var dateTaken))
                 {
                     return dateTaken;
                 }
@@ -100,5 +107,29 @@ public sealed class PhotoService : IPhotoService
         }
 
         return File.GetCreationTime(filePath);
+    }
+
+    private static bool TryParseDateTaken(string dateString, out DateTime dateTaken)
+    {
+        dateTaken = default;
+
+        if (string.IsNullOrWhiteSpace(dateString))
+        {
+            return false;
+        }
+
+        var normalized = dateString.Trim('\0', ' ');
+
+        if (DateTime.TryParseExact(
+                normalized,
+                ExifDateFormats,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeLocal,
+                out dateTaken))
+        {
+            return true;
+        }
+
+        return DateTime.TryParse(normalized, out dateTaken);
     }
 }
