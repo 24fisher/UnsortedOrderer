@@ -27,3 +27,11 @@ serviceProvider
 
 var application = serviceProvider.GetRequiredService<FileOrganizerApplication>();
 application.Run();
+
+var messageWriter = serviceProvider.GetRequiredService<IMessageWriter>();
+
+if (!Console.IsInputRedirected)
+{
+    messageWriter.WriteLine("Press any key to exit...");
+    Console.ReadKey(intercept: true);
+}
