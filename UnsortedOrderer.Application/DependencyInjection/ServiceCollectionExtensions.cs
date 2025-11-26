@@ -19,13 +19,17 @@ public static class ServiceCollectionExtensions
             _ => new PhotoCameraFileNamePatternService(settings.CameraFileNamePatterns));
         services.AddSingleton<ICameraFileNamePatternService>(
             _ => new VideoCameraFileNamePatternService(settings.CameraFileNamePatterns));
+        services.AddSingleton<IMessengerPathService, MessengerPathService>();
         services.AddSingleton<IPhotoCameraMetadataService, PhotoCameraMetadataService>();
+        services.AddSingleton<IVideoDateService, VideoDateService>();
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
             var cameraFileNamePatternService = provider.GetRequiredService<IEnumerable<ICameraFileNamePatternService>>();
+            var messengerPathService = provider.GetRequiredService<IMessengerPathService>();
+            var videoDateService = provider.GetRequiredService<IVideoDateService>();
             return new IFileCategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),
@@ -34,7 +38,7 @@ public static class ServiceCollectionExtensions
                 new MusicalInstrumentsCategory(appSettings.MusicalInstrumentsFolderName),
                 new EBooksCategory(appSettings.EBooksFolderName),
                 new DocumentsCategory(),
-                new VideosCategory(cameraFileNamePatternService),
+                new VideosCategory(cameraFileNamePatternService, videoDateService, messengerPathService),
                 new ThreeDModelsCategory(),
                 new ArchivesCategory(appSettings.ArchiveFolderName),
                 new CertificatesCategory(),

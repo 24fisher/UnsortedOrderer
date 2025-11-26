@@ -15,13 +15,20 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
     ];
 
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
+    private readonly IVideoDateService _videoDateService;
+    private readonly IMessengerPathService _messengerPathService;
 
-    public VideosCategory(IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices)
+    public VideosCategory(
+        IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices,
+        IVideoDateService videoDateService,
+        IMessengerPathService messengerPathService)
         : base("Videos", "Videos", VideoExtensions)
     {
         _cameraFileNamePatternService = cameraFileNamePatternServices
             .FirstOrDefault(service => service.MediaType == CameraMediaType.Video)
             ?? throw new InvalidOperationException("Video camera file name pattern service is not configured.");
+        _videoDateService = videoDateService;
+        _messengerPathService = messengerPathService;
     }
 
     public bool IsNonSplittableDirectory(string path)
@@ -36,9 +43,17 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
 
     public string GetFileDestination(string destinationRoot, string filePath)
     {
-        var year = GetVideoYear(filePath);
+        var date = _videoDateService.GetVideoDate(filePath);
         var cameraFolder = GetCameraSubfolder(Path.GetFileName(filePath));
-        var baseDirectory = Path.Combine(destinationRoot, FolderName, year.ToString());
+        var messengerFolder = _messengerPathService.GetMessengerFolder(filePath);
+        var baseDirectory = Path.Combine(destinationRoot, FolderName);
+
+        if (!string.IsNullOrWhiteSpace(messengerFolder))
+        {
+            baseDirectory = Path.Combine(baseDirectory, messengerFolder);
+        }
+
+        baseDirectory = Path.Combine(baseDirectory, date.Year.ToString(), date.Month.ToString("D2"));
 
         return cameraFolder is null
             ? baseDirectory
@@ -53,29 +68,5 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
         }
 
         return _cameraFileNamePatternService.GetBrandByFileName(fileName);
-    }
-
-    private static int GetVideoYear(string filePath)
-    {
-        try
-        {
-            var creationTime = File.GetCreationTime(filePath);
-            if (creationTime.Year > 1)
-            {
-                return creationTime.Year;
-            }
-
-            var lastWriteTime = File.GetLastWriteTime(filePath);
-            if (lastWriteTime.Year > 1)
-            {
-                return lastWriteTime.Year;
-            }
-        }
-        catch
-        {
-            return DateTime.Now.Year;
-        }
-
-        return DateTime.Now.Year;
     }
 }

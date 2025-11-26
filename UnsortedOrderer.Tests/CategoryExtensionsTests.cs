@@ -37,7 +37,10 @@ public class CategoryExtensionsTests
             new MusicalInstrumentsCategory("MusicalInstruments"),
             new EBooksCategory("EBooks"),
             new DocumentsCategory(),
-            new VideosCategory(CreateVideoCameraFileNamePatternServices()),
+            new VideosCategory(
+                CreateVideoCameraFileNamePatternServices(),
+                new StubVideoDateService(),
+                new StubMessengerPathService()),
             new ThreeDModelsCategory(),
             new ArchivesCategory("Archives"),
             new CertificatesCategory(),
@@ -56,6 +59,19 @@ public class CategoryExtensionsTests
         {
             new VideoCameraFileNamePatternService(Array.Empty<DeviceBrandPattern>())
         };
+    }
+
+    private sealed class StubVideoDateService : IVideoDateService
+    {
+        public DateTime GetVideoDate(string filePath)
+        {
+            return DateTime.UtcNow;
+        }
+    }
+
+    private sealed class StubMessengerPathService : IMessengerPathService
+    {
+        public string? GetMessengerFolder(string filePath) => null;
     }
 
     private static IReadOnlyDictionary<string, IReadOnlyCollection<IFileCategory>> FindExtensionOverlaps(

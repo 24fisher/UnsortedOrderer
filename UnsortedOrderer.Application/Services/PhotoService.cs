@@ -10,6 +10,7 @@ public sealed class PhotoService : IPhotoService
 {
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
     private readonly IPhotoCameraMetadataService _photoCameraMetadataService;
+    private readonly IMessengerPathService _messengerPathService;
     private const int SmallImageMaxDimension = 512;
     private const long SmallImageMaxBytes = 300 * 1024;
     private const int DateTakenId = 0x9003; // PropertyTagExifDTOrig
@@ -22,12 +23,14 @@ public sealed class PhotoService : IPhotoService
 
     public PhotoService(
         IEnumerable<ICameraFileNamePatternService> cameraFileNamePatternServices,
-        IPhotoCameraMetadataService photoCameraMetadataService)
+        IPhotoCameraMetadataService photoCameraMetadataService,
+        IMessengerPathService messengerPathService)
     {
         _cameraFileNamePatternService = cameraFileNamePatternServices
             .FirstOrDefault(service => service.MediaType == CameraMediaType.Photo)
             ?? throw new InvalidOperationException("Photo camera file name pattern service is not configured.");
         _photoCameraMetadataService = photoCameraMetadataService;
+        _messengerPathService = messengerPathService;
     }
 
     public bool IsPhoto(string filePath)
@@ -67,14 +70,24 @@ public sealed class PhotoService : IPhotoService
     public string MovePhoto(
         string filePath,
         string destinationRoot,
-        string photosFolderName)
+        string photosFolderName,
+        string? messengerFolderName = null)
     {
         var date = GetPhotoDate(filePath);
         var brandFolder = _photoCameraMetadataService.GetCameraFolder(filePath)
             ?? _cameraFileNamePatternService.GetBrandByFileName(Path.GetFileName(filePath));
         var photoDirectory = Path.Combine(
             destinationRoot,
-            photosFolderName,
+            photosFolderName);
+
+        var messengerFolder = messengerFolderName ?? _messengerPathService.GetMessengerFolder(filePath);
+        if (!string.IsNullOrWhiteSpace(messengerFolder))
+        {
+            photoDirectory = Path.Combine(photoDirectory, messengerFolder);
+        }
+
+        photoDirectory = Path.Combine(
+            photoDirectory,
             date.Year.ToString(),
             date.Month.ToString("D2"));
 

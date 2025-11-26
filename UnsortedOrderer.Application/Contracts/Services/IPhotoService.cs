@@ -9,5 +9,6 @@ public interface IPhotoService
     string MovePhoto(
         string filePath,
         string destinationRoot,
-        string photosFolderName);
+        string photosFolderName,
+        string? messengerFolderName = null);
 }

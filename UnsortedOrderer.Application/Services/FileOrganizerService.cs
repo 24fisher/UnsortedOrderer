@@ -11,6 +11,7 @@ public sealed class FileOrganizerService
     private readonly AppSettings _settings;
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
+    private readonly IMessengerPathService _messengerPathService;
     private readonly IMessageWriter _messageWriter;
     private readonly IStatisticsService _statisticsService;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
@@ -30,6 +31,7 @@ public sealed class FileOrganizerService
         AppSettings settings,
         IArchiveService archiveService,
         IPhotoService photoService,
+        IMessengerPathService messengerPathService,
         IEnumerable<IFileCategory> categories,
         IStatisticsService statisticsService,
         IMessageWriter messageWriter)
@@ -37,6 +39,7 @@ public sealed class FileOrganizerService
         _settings = settings;
         _archiveService = archiveService;
         _photoService = photoService;
+        _messengerPathService = messengerPathService;
         _statisticsService = statisticsService;
         _messageWriter = messageWriter;
         _categories = categories.ToArray();
@@ -147,6 +150,13 @@ public sealed class FileOrganizerService
                 break;
             case ImagesCategory:
                 var imagesDirectory = Path.Combine(_settings.DestinationRoot, category.FolderName);
+                var messengerFolder = _messengerPathService.GetMessengerFolder(filePath);
+
+                if (!string.IsNullOrWhiteSpace(messengerFolder))
+                {
+                    imagesDirectory = Path.Combine(imagesDirectory, messengerFolder);
+                }
+
                 var imageDestination = FileUtilities.MoveFile(filePath, imagesDirectory);
                 _statisticsService.RecordMovedFile(imageDestination, category.FolderName);
                 break;
