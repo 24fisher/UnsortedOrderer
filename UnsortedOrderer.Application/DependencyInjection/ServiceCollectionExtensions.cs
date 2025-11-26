@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(settings);
         services.AddSingleton<IArchiveService, ArchiveService>();
         services.AddSingleton<IPhotoService, PhotoService>();
+        services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
