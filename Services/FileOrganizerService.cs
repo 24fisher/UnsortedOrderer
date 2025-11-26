@@ -8,6 +8,7 @@ public sealed class FileOrganizerService
     private readonly AppSettings _settings;
     private readonly IArchiveService _archiveService;
     private readonly IPhotoService _photoService;
+    private readonly IMessageWriter _messageWriter;
     private readonly IReadOnlyCollection<IFileCategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
@@ -32,11 +33,13 @@ public sealed class FileOrganizerService
         AppSettings settings,
         IArchiveService archiveService,
         IPhotoService photoService,
-        IEnumerable<IFileCategory> categories)
+        IEnumerable<IFileCategory> categories,
+        IMessageWriter messageWriter)
     {
         _settings = settings;
         _archiveService = archiveService;
         _photoService = photoService;
+        _messageWriter = messageWriter;
         _categories = categories.ToArray();
         _nonSplittableCategories = _categories.OfType<INonSplittableDirectoryCategory>().ToArray();
         _imageCategories = _categories.OfType<ImageCategoryBase>().ToArray();
@@ -69,14 +72,14 @@ public sealed class FileOrganizerService
     {
         if (!Directory.Exists(_settings.SourceDirectory))
         {
-            Console.WriteLine($"Source directory '{_settings.SourceDirectory}' does not exist.");
+            _messageWriter.WriteLine($"Source directory '{_settings.SourceDirectory}' does not exist.");
             return;
         }
 
         Directory.CreateDirectory(_settings.DestinationRoot);
-        Console.WriteLine($"Ensured destination root exists at '{_settings.DestinationRoot}'.");
+        _messageWriter.WriteLine($"Ensured destination root exists at '{_settings.DestinationRoot}'.");
 
-        Console.WriteLine("Press any key to start file scan...");
+        _messageWriter.WriteLine("Press any key to start file scan...");
         Console.ReadKey(intercept: true);
 
         ProcessDirectory(_settings.SourceDirectory);
@@ -87,7 +90,7 @@ public sealed class FileOrganizerService
 
     private void ProcessDirectory(string directory)
     {
-        Console.WriteLine($"Scanning directory: {directory}");
+        _messageWriter.WriteLine($"Scanning directory: {directory}");
 
         foreach (var file in Directory.GetFiles(directory))
         {
@@ -269,7 +272,7 @@ public sealed class FileOrganizerService
     {
         RecordMovedFiles(1, category);
 
-        Console.WriteLine($"Moved to '{destinationPath}' (category: {category}).");
+        _messageWriter.WriteLine($"Moved to '{destinationPath}' (category: {category}).");
     }
 
     private void RecordMovedFiles(int count, string category)
@@ -293,14 +296,14 @@ public sealed class FileOrganizerService
         _movedNonSplittableDirectories.Add(new NonSplittableDirectoryRecord(destinationPath, category.FolderName, fileCount));
         RecordMovedFiles(fileCount, category.FolderName);
 
-        Console.WriteLine($"Moved directory '{destinationPath}' (category: {category.FolderName}, files: {fileCount}).");
+        _messageWriter.WriteLine($"Moved directory '{destinationPath}' (category: {category.FolderName}, files: {fileCount}).");
     }
 
     private void RecordDeletedDirectory(string directory)
     {
         if (_deletedDirectories.Add(directory))
         {
-            Console.WriteLine($"Deleted directory: {directory}");
+            _messageWriter.WriteLine($"Deleted directory: {directory}");
         }
     }
 
@@ -391,28 +394,28 @@ public sealed class FileOrganizerService
 
     private void PrintStatistics()
     {
-        Console.WriteLine();
-        Console.WriteLine("Organization summary:");
-        Console.WriteLine($"Total files moved: {_totalMovedFiles}");
+        _messageWriter.WriteLine(string.Empty);
+        _messageWriter.WriteLine("Organization summary:");
+        _messageWriter.WriteLine($"Total files moved: {_totalMovedFiles}");
 
         foreach (var category in _categories.OrderBy(c => c.FolderName, StringComparer.OrdinalIgnoreCase))
         {
             var movedCount = _movedFilesByCategory.TryGetValue(category.FolderName, out var count)
                 ? count
                 : 0;
-            Console.WriteLine($"  {category.FolderName}: {movedCount}");
+            _messageWriter.WriteLine($"  {category.FolderName}: {movedCount}");
         }
 
         if (_unknownExtensions.Count == 0)
         {
-            Console.WriteLine("Unknown file types: none");
+            _messageWriter.WriteLine("Unknown file types: none");
         }
         else
         {
-            Console.WriteLine($"Unknown file types encountered: {_totalUnknownFiles}");
+            _messageWriter.WriteLine($"Unknown file types encountered: {_totalUnknownFiles}");
             foreach (var unknown in _unknownExtensions.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
             {
-                Console.WriteLine($"  {unknown.Key}: {unknown.Value}");
+                _messageWriter.WriteLine($"  {unknown.Key}: {unknown.Value}");
             }
         }
 
@@ -422,14 +425,14 @@ public sealed class FileOrganizerService
 
         if (_deletedDirectories.Count == 0)
         {
-            Console.WriteLine("Deleted directories: none");
+            _messageWriter.WriteLine("Deleted directories: none");
             return;
         }
 
-        Console.WriteLine("Deleted directories:");
+        _messageWriter.WriteLine("Deleted directories:");
         foreach (var directory in _deletedDirectories.OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"  {directory}");
+            _messageWriter.WriteLine($"  {directory}");
         }
 
         PrintSourceDirectoryCompletion();
@@ -443,14 +446,14 @@ public sealed class FileOrganizerService
 
         if (_totalDeletedFiles == 0 || filteredDeleted.Length == 0)
         {
-            Console.WriteLine("Deleted uncategorized files: none");
+            _messageWriter.WriteLine("Deleted uncategorized files: none");
             return;
         }
 
-        Console.WriteLine($"Deleted uncategorized files: {filteredDeleted.Sum(kvp => kvp.Value)}");
+        _messageWriter.WriteLine($"Deleted uncategorized files: {filteredDeleted.Sum(kvp => kvp.Value)}");
         foreach (var deleted in filteredDeleted.OrderBy(k => k.Key, StringComparer.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"  {deleted.Key}: {deleted.Value}");
+            _messageWriter.WriteLine($"  {deleted.Key}: {deleted.Value}");
         }
     }
 
@@ -461,25 +464,25 @@ public sealed class FileOrganizerService
             return;
         }
 
-        Console.WriteLine();
-        Console.WriteLine("====================");
-        Console.WriteLine("Source directory fully processed. No files remain to organize.");
-        Console.WriteLine("====================");
+        _messageWriter.WriteLine(string.Empty);
+        _messageWriter.WriteLine("====================");
+        _messageWriter.WriteLine("Source directory fully processed. No files remain to organize.");
+        _messageWriter.WriteLine("====================");
     }
 
     private void PrintNonSplittableDirectories()
     {
         if (_movedNonSplittableDirectories.Count == 0)
         {
-            Console.WriteLine("Non-splittable directories moved: none");
+            _messageWriter.WriteLine("Non-splittable directories moved: none");
             return;
         }
 
-        Console.WriteLine("Non-splittable directories moved:");
+        _messageWriter.WriteLine("Non-splittable directories moved:");
         foreach (var record in _movedNonSplittableDirectories
                      .OrderBy(r => r.Destination, StringComparer.OrdinalIgnoreCase))
         {
-            Console.WriteLine($"  {record.Destination} ({record.FileCount} files)");
+            _messageWriter.WriteLine($"  {record.Destination} ({record.FileCount} files)");
         }
     }
 
