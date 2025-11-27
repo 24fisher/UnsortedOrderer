@@ -20,10 +20,14 @@ public sealed class ArchiveService : IArchiveService
         Directory.CreateDirectory(finalDestinationDirectory);
 
         var destinationPath = Path.Combine(finalDestinationDirectory, Path.GetFileName(archivePath));
-        var finalPath = FileUtilities.GetUniqueFilePath(destinationPath);
-        File.Move(archivePath, finalPath);
+        if (File.Exists(destinationPath))
+        {
+            File.Delete(destinationPath);
+        }
 
-        return finalPath;
+        File.Move(archivePath, destinationPath);
+
+        return destinationPath;
     }
 
     private string? FindMatchingDestinationDirectory(string archivePath)
