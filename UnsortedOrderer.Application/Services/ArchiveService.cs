@@ -34,16 +34,6 @@ public sealed class ArchiveService : IArchiveService
             return null;
         }
 
-        var sourceDirectory = Path.GetDirectoryName(archivePath);
-        if (!string.IsNullOrWhiteSpace(sourceDirectory))
-        {
-            var sourceSiblingDestination = FindMatchingSiblingDirectory(sourceDirectory, archivePath, archiveName);
-            if (sourceSiblingDestination is not null)
-            {
-                return sourceSiblingDestination;
-            }
-        }
-
         if (!string.IsNullOrWhiteSpace(_settings.DestinationRoot) && Directory.Exists(_settings.DestinationRoot))
         {
             var destinationSiblingDirectory = FindMatchingDirectoryInDestinationRoot(archiveName);
@@ -51,32 +41,6 @@ public sealed class ArchiveService : IArchiveService
             {
                 return destinationSiblingDirectory;
             }
-        }
-
-        return null;
-    }
-
-    private static string? FindMatchingSiblingDirectory(string sourceDirectory, string archivePath, string archiveName)
-    {
-        foreach (var siblingPath in Directory.EnumerateFileSystemEntries(sourceDirectory))
-        {
-            if (string.Equals(siblingPath, archivePath, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var siblingName = Directory.Exists(siblingPath)
-                ? Path.GetFileName(siblingPath)
-                : Path.GetFileNameWithoutExtension(siblingPath);
-
-            if (!IsHalfNameMatch(archiveName, siblingName))
-            {
-                continue;
-            }
-
-            return Directory.Exists(siblingPath)
-                ? siblingPath
-                : Path.GetDirectoryName(siblingPath);
         }
 
         return null;

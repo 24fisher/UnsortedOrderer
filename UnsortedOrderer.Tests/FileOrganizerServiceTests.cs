@@ -252,4 +252,61 @@ public class FileOrganizerServiceTests
         Assert.True(File.Exists(movedModel));
         Assert.True(File.Exists(movedArchive));
     }
+
+    [Fact]
+    public void ArchiveUsesDestinationDirectory_WhenSiblingOnlyExistsInSource()
+    {
+        using var source = new TempDirectory();
+        using var destination = new TempDirectory();
+
+        var siblingPath = System.IO.Path.Combine(source.Path, "demo.exe");
+        var archivePath = System.IO.Path.Combine(source.Path, "demo.zip");
+
+        File.WriteAllText(siblingPath, "exe");
+        File.WriteAllText(archivePath, "zip");
+
+        var settings = new AppSettings(
+            source.Path,
+            destination.Path,
+            softFolderName: "Soft",
+            archiveFolderName: "Archives",
+            imagesFolderName: "Images",
+            photosFolderName: "Photos",
+            musicFolderName: "Music",
+            musicalInstrumentsFolderName: "Instruments",
+            eBooksFolderName: "EBooks",
+            repositoriesFolderName: "Repositories",
+            driversFolderName: "Drivers",
+            firmwareFolderName: "Firmware",
+            metadataFolderName: "Metadata",
+            webFolderName: "Web",
+            graphicsFolderName: "Graphics",
+            unknownFolderName: "Unknown",
+            deletedExtensions: Array.Empty<string>(),
+            documentImageKeywords: Array.Empty<string>(),
+            cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
+            softwareArchiveKeywords: Array.Empty<string>());
+
+        var categories = new IFileCategory[]
+        {
+            new ArchivesCategory(settings.ArchiveFolderName),
+            new UnknownCategory(settings.UnknownFolderName)
+        };
+
+        var organizer = new FileOrganizerService(
+            settings,
+            new ArchiveService(settings),
+            new StubPhotoService(isPhoto: false),
+            new StubMessengerPathService(),
+            categories,
+            new RecordingStatisticsService(),
+            new StubMessageWriter());
+
+        InvokeProcessFile(organizer, archivePath);
+
+        var archiveDestination = System.IO.Path.Combine(destination.Path, settings.ArchiveFolderName, "demo.zip");
+
+        Assert.False(File.Exists(archivePath));
+        Assert.True(File.Exists(archiveDestination));
+    }
 }
