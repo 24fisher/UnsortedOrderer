@@ -269,21 +269,62 @@ public sealed class FileOrganizerService
             return null;
         }
 
-        var matchingFile = Directory
-            .EnumerateFiles(directory)
-            .FirstOrDefault(path => !string.Equals(path, archivePath, StringComparison.OrdinalIgnoreCase)
-                                    && string.Equals(
-                                        Path.GetFileNameWithoutExtension(path),
-                                        archiveName,
-                                        StringComparison.OrdinalIgnoreCase));
-
-        if (matchingFile is null)
+        foreach (var siblingPath in Directory.EnumerateFileSystemEntries(directory))
         {
-            return null;
+            if (string.Equals(siblingPath, archivePath, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var siblingName = Directory.Exists(siblingPath)
+                ? Path.GetFileName(siblingPath)
+                : Path.GetFileNameWithoutExtension(siblingPath);
+
+            if (!IsHalfNameMatch(archiveName, siblingName))
+            {
+                continue;
+            }
+
+            if (Directory.Exists(siblingPath))
+            {
+                var siblingCategory = _nonSplittableCategories
+                    .FirstOrDefault(category => category.IsNonSplittableDirectory(siblingPath));
+
+                if (siblingCategory is not null)
+                {
+                    return siblingCategory;
+                }
+
+                continue;
+            }
+
+            var matchedExtension = Path.GetExtension(siblingPath).ToLowerInvariant();
+            var category = _categories.FirstOrDefault(c => c.Matches(matchedExtension));
+            if (category is not null)
+            {
+                return category;
+            }
         }
 
-        var matchedExtension = Path.GetExtension(matchingFile).ToLowerInvariant();
-        return _categories.FirstOrDefault(c => c.Matches(matchedExtension));
+        return null;
+    }
+
+    private static bool IsHalfNameMatch(string archiveName, string siblingName)
+    {
+        if (string.IsNullOrWhiteSpace(archiveName) || string.IsNullOrWhiteSpace(siblingName))
+        {
+            return false;
+        }
+
+        var compareLength = Math.Min(archiveName.Length, siblingName.Length) / 2;
+        if (compareLength == 0)
+        {
+            return false;
+        }
+
+        return archiveName
+            .AsSpan(0, compareLength)
+            .Equals(siblingName.AsSpan(0, compareLength), StringComparison.OrdinalIgnoreCase);
     }
 
     private void CleanEmptyDirectories(string root)
