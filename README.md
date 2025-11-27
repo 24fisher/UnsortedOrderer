@@ -35,6 +35,7 @@
 - Installer directories are detected separately and moved intact into the software folder without unpacking.
 - Device firmware directories (with documentation and helper files) are moved intact into `FirmwareFolderName`.
 - When an archive name matches an already moved software folder, the folder is removed and the archive is placed in its spot.
+- When an archive shares the first half of its name with an unarchived file or folder in the same source directory, the archive is moved to that item's destination category so it ends up beside it.
 - Empty directories are removed after processing.
 
 Run the app from the repository root with `dotnet run --project UnsortedOrderer.ConsoleApp/UnsortedOrderer.ConsoleApp.csproj` after verifying paths in `appsettings.json` are correct.
