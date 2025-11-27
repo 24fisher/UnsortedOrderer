@@ -191,4 +191,65 @@ public class FileOrganizerServiceTests
         Assert.False(Directory.Exists(System.IO.Path.Combine(repositoriesDestination, "outer")));
         Assert.True(Directory.Exists(outer));
     }
+
+    [Fact]
+    public void ArchiveFollowsSiblingCategory_WhenSiblingIsMovedFirst()
+    {
+        using var source = new TempDirectory();
+        using var destination = new TempDirectory();
+
+        var stlPath = System.IO.Path.Combine(source.Path, "oneup plug.stl");
+        var archivePath = System.IO.Path.Combine(source.Path, "oneup plug.zip");
+
+        File.WriteAllText(stlPath, "dummy-stl");
+        File.WriteAllText(archivePath, "dummy-zip");
+
+        var settings = new AppSettings(
+            source.Path,
+            destination.Path,
+            softFolderName: "Soft",
+            archiveFolderName: "Archives",
+            imagesFolderName: "Images",
+            photosFolderName: "Photos",
+            musicFolderName: "Music",
+            musicalInstrumentsFolderName: "Instruments",
+            eBooksFolderName: "EBooks",
+            repositoriesFolderName: "Repositories",
+            driversFolderName: "Drivers",
+            firmwareFolderName: "Firmware",
+            metadataFolderName: "Metadata",
+            webFolderName: "Web",
+            graphicsFolderName: "Graphics",
+            unknownFolderName: "Unknown",
+            deletedExtensions: Array.Empty<string>(),
+            documentImageKeywords: Array.Empty<string>(),
+            cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
+            softwareArchiveKeywords: Array.Empty<string>());
+
+        var categories = new IFileCategory[]
+        {
+            new ThreeDModelsCategory(),
+            new ArchivesCategory(settings.ArchiveFolderName),
+            new UnknownCategory(settings.UnknownFolderName)
+        };
+
+        var organizer = new FileOrganizerService(
+            settings,
+            new ArchiveService(settings),
+            new StubPhotoService(isPhoto: false),
+            new StubMessengerPathService(),
+            categories,
+            new RecordingStatisticsService(),
+            new StubMessageWriter());
+
+        InvokeProcessFile(organizer, stlPath);
+        InvokeProcessFile(organizer, archivePath);
+
+        var threeDModelsDirectory = System.IO.Path.Combine(destination.Path, "3DModels");
+        var movedModel = System.IO.Path.Combine(threeDModelsDirectory, "oneup plug.stl");
+        var movedArchive = System.IO.Path.Combine(threeDModelsDirectory, "oneup plug.zip");
+
+        Assert.True(File.Exists(movedModel));
+        Assert.True(File.Exists(movedArchive));
+    }
 }
