@@ -12,17 +12,17 @@ public sealed class MusicCategory : FileCategory, INonSplittableDirectoryCategor
         ".mp3", ".wav", ".flac", ".aac", ".m4a", ".ogg", ".wma", ".aiff", ".alac", ".opus"
     ];
 
-    private readonly IMusicDirectoryDetector _musicDirectoryDetector;
+    private readonly IFileCategoryParsingService _musicCategoryParsingService;
 
     public MusicCategory(string folderName, IMusicDirectoryDetector musicDirectoryDetector)
         : base("Music", folderName, MusicExtensions)
     {
-        _musicDirectoryDetector = musicDirectoryDetector;
+        _musicCategoryParsingService = musicDirectoryDetector;
     }
 
     public bool IsNonSplittableDirectory(string path)
     {
-        return _musicDirectoryDetector.IsMusicDirectory(path);
+        return _musicCategoryParsingService.IsFolderOfCategory<MusicCategory>(path);
     }
 
     public string GetDirectoryDestination(string destinationRoot, string directoryPath)

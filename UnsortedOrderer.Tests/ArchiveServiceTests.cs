@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using UnsortedOrderer.Contracts.Categories;
+using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
 using Xunit;
@@ -45,7 +48,8 @@ public sealed class ArchiveServiceTests
             cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
             softwareArchiveKeywords: Array.Empty<string>());
 
-        var service = new ArchiveService(settings);
+        var statistics = new NullStatisticsService();
+        var service = new ArchiveService(settings, Array.Empty<IFileCategory>(), statistics);
 
         var movedArchivePath = service.HandleArchive(archivePath, destinationDirectory);
 
@@ -53,6 +57,37 @@ public sealed class ArchiveServiceTests
         Assert.False(File.Exists(archivePath));
         Assert.True(File.Exists(existingArchivePath));
         Assert.Equal("new-archive", File.ReadAllText(existingArchivePath));
+    }
+
+    private sealed class NullStatisticsService : IStatisticsService
+    {
+        public void RecordMovedFile(string destinationPath, string category)
+        {
+        }
+
+        public void RecordMovedFiles(int count, string category)
+        {
+        }
+
+        public void RecordMovedNonSplittableDirectory(INonSplittableDirectoryCategory category, string destinationPath, int fileCount)
+        {
+        }
+
+        public void RecordDeletedDirectory(string directory)
+        {
+        }
+
+        public void RecordUnknownFile(string extension)
+        {
+        }
+
+        public void RecordDeletedFile(string extension)
+        {
+        }
+
+        public void PrintStatistics(string sourceDirectory)
+        {
+        }
     }
 
     private sealed class TempDirectory : IDisposable

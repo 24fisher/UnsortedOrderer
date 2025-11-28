@@ -27,6 +27,18 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IMusicDirectoryDetector, MusicDirectoryDetector>();
+        services.AddSingleton<RepositoryDetector>(
+            _ => new RepositoryDetector(RepositoriesCategory.CodeExtensions));
+        services.AddSingleton<SoftwareDistributivesDetector>();
+
+        services.AddSingleton<IFileCategoryParsingService>(
+            provider => (IFileCategoryParsingService)provider.GetRequiredService<IPhotoService>());
+        services.AddSingleton<IFileCategoryParsingService>(
+            provider => (IFileCategoryParsingService)provider.GetRequiredService<IMusicDirectoryDetector>());
+        services.AddSingleton<IFileCategoryParsingService>(
+            provider => provider.GetRequiredService<RepositoryDetector>());
+        services.AddSingleton<IFileCategoryParsingService>(
+            provider => provider.GetRequiredService<SoftwareDistributivesDetector>());
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
@@ -34,6 +46,8 @@ public static class ServiceCollectionExtensions
             var messengerPathService = provider.GetRequiredService<IMessengerPathService>();
             var videoDateService = provider.GetRequiredService<IVideoDateService>();
             var musicDirectoryDetector = provider.GetRequiredService<IMusicDirectoryDetector>();
+            var repositoryDetector = provider.GetRequiredService<RepositoryDetector>();
+            var softwareDistributivesDetector = provider.GetRequiredService<SoftwareDistributivesDetector>();
             return new IFileCategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),
@@ -48,11 +62,11 @@ public static class ServiceCollectionExtensions
                 new ThreeDModelsCategory(),
                 new ArchivesCategory(appSettings.ArchiveFolderName),
                 new CertificatesCategory(),
-                new RepositoriesCategory(appSettings.RepositoriesFolderName),
+                new RepositoriesCategory(appSettings.RepositoriesFolderName, repositoryDetector),
                 new FirmwareCategory(appSettings.FirmwareFolderName),
                 new MetadataCategory(appSettings.MetadataFolderName),
                 new DriversCategory(appSettings.DriversFolderName),
-                new SoftCategory(appSettings.SoftFolderName),
+                new SoftCategory(appSettings.SoftFolderName, softwareDistributivesDetector),
                 new UnknownCategory(appSettings.UnknownFolderName)
             };
         });

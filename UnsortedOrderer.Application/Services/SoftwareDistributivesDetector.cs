@@ -1,8 +1,10 @@
 using System.Text.RegularExpressions;
+using UnsortedOrderer.Categories;
+using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 namespace UnsortedOrderer.Services;
 
-public sealed class SoftwareDistributivesDetector : IDistributionDetector
+public sealed class SoftwareDistributivesDetector : IDistributionDetector, IFileCategoryParsingService
 {
     private static readonly string[] InstallerExtensions = [
         ".exe", ".msi", ".msix", ".apk", ".dmg", ".pkg", ".deb", ".rpm", ".appimage", ".iso"
@@ -42,6 +44,18 @@ public sealed class SoftwareDistributivesDetector : IDistributionDetector
 
         var fileName = Path.GetFileNameWithoutExtension(filePath) ?? string.Empty;
         return SetupKeywords.IsMatch(fileName);
+    }
+
+    public bool IsFileOfCategory<TCategory>(string filePath)
+        where TCategory : IFileCategory
+    {
+        return typeof(TCategory) == typeof(SoftCategory) && MatchesInstaller(filePath);
+    }
+
+    public bool IsFolderOfCategory<TCategory>(string folderPath)
+        where TCategory : IFileCategory
+    {
+        return typeof(TCategory) == typeof(SoftCategory) && IsDistributionDirectory(folderPath);
     }
 
     private static bool IsSoftFolder(string folderName)

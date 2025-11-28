@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Drawing;
 using System.Linq;
+using UnsortedOrderer.Categories;
+using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 namespace UnsortedOrderer.Services;
 
-public sealed class PhotoService : IPhotoService
+public sealed class PhotoService : IPhotoService, IFileCategoryParsingService
 {
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
     private readonly IPhotoCameraMetadataService _photoCameraMetadataService;
@@ -65,6 +67,18 @@ public sealed class PhotoService : IPhotoService
         }
 
         return new FileInfo(filePath).Length > SmallImageMaxBytes;
+    }
+
+    public bool IsFileOfCategory<TCategory>(string filePath)
+        where TCategory : IFileCategory
+    {
+        return typeof(TCategory) == typeof(PhotosCategory) && IsPhoto(filePath);
+    }
+
+    public bool IsFolderOfCategory<TCategory>(string folderPath)
+        where TCategory : IFileCategory
+    {
+        return false;
     }
 
     public string MovePhoto(

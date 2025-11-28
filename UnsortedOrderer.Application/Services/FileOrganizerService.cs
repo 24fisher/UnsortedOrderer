@@ -21,6 +21,7 @@ public sealed class FileOrganizerService
     private readonly DriversCategory? _driversCategory;
     private readonly PhotosCategory? _photosCategory;
     private readonly ImagesCategory? _imagesCategory;
+    private readonly IReadOnlyCollection<IFileCategoryParsingService> _categoryParsingServices;
     private readonly CategoryCache _categoryCache;
     private readonly UnknownCategory _unknownCategory;
     private readonly SpecialCategoriesHandler _specialCategoriesHandler;
@@ -33,6 +34,7 @@ public sealed class FileOrganizerService
         IPhotoService photoService,
         IMessengerPathService messengerPathService,
         IEnumerable<IFileCategory> categories,
+        IEnumerable<IFileCategoryParsingService> categoryParsingServices,
         IStatisticsService statisticsService,
         IMessageWriter messageWriter)
     {
@@ -49,6 +51,7 @@ public sealed class FileOrganizerService
         _driversCategory = _categories.OfType<DriversCategory>().FirstOrDefault();
         _photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
         _imagesCategory = _imageCategories.OfType<ImagesCategory>().FirstOrDefault();
+        _categoryParsingServices = categoryParsingServices.ToArray();
         _categoryCache = new CategoryCache(_categories);
         _specialCategoriesHandler = new SpecialCategoriesHandler(
             _imageCategories,
@@ -173,7 +176,8 @@ public sealed class FileOrganizerService
                 _statisticsService.RecordMovedFile(imageDestination, category.FolderName);
                 break;
             case ArchivesCategory:
-                HandleArchiveFile(filePath, category.FolderName);
+                var archiveResult = _archiveService.HandleArchiveFile(filePath, category.FolderName);
+                _statisticsService.RecordMovedFile(archiveResult.DestinationPath, archiveResult.CategoryName);
                 break;
             default:
                 var destinationDirectory = category is INonSplittableDirectoryCategory nonSplittableCategory
@@ -190,6 +194,12 @@ public sealed class FileOrganizerService
         if (_driversCategory is not null && _driversCategory.IsDriverFile(filePath))
         {
             return _driversCategory;
+        }
+
+        var parsedCategory = TryResolveWithParsingServices(filePath, extension);
+        if (parsedCategory is not null)
+        {
+            return parsedCategory;
         }
 
         if (_categoryCache.ImageCategoryExtensions.Contains(extension))
@@ -209,6 +219,50 @@ public sealed class FileOrganizerService
             : null;
     }
 
+    private IFileCategory? TryResolveWithParsingServices(string filePath, string extension)
+    {
+        var matchingCategories = _categories
+            .Where(category => category.Matches(extension))
+            .ToArray();
+
+        if (matchingCategories.Length == 0)
+        {
+            return null;
+        }
+
+        foreach (var parsingService in _categoryParsingServices)
+        {
+            foreach (var category in matchingCategories)
+            {
+                if (IsFileOfCategory(parsingService, category, filePath))
+                {
+                    return category;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsFileOfCategory(
+        IFileCategoryParsingService parsingService,
+        IFileCategory category,
+        string filePath)
+    {
+        var methodInfo = parsingService
+            .GetType()
+            .GetMethod(nameof(IFileCategoryParsingService.IsFileOfCategory));
+
+        if (methodInfo is null)
+        {
+            return false;
+        }
+
+        var genericMethod = methodInfo.MakeGenericMethod(category.GetType());
+        var result = genericMethod.Invoke(parsingService, new object[] { filePath });
+        return result is bool matched && matched;
+    }
+
     private void MoveNonSplittableDirectory(string directory, INonSplittableDirectoryCategory category)
     {
         var sourceDirectory = category is RepositoriesCategory repositoriesCategory
@@ -220,111 +274,6 @@ public sealed class FileOrganizerService
         Directory.Move(sourceDirectory, destinationPath);
 
         _statisticsService.RecordMovedNonSplittableDirectory(category, destinationPath, fileCount);
-    }
-
-    private void HandleArchiveFile(string filePath, string categoryName)
-    {
-        RemoveExistingDistributionDirectory(filePath);
-
-        if (IsSoftwareArchive(filePath))
-        {
-            var softArchiveDestination = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName);
-            var movedArchive = _archiveService.HandleArchive(filePath, softArchiveDestination);
-            _statisticsService.RecordMovedFile(movedArchive, _settings.SoftFolderName);
-            return;
-        }
-
-        var matchingCategory = FindMatchingSiblingCategory(filePath);
-        if (matchingCategory is not null)
-        {
-            var matchingDestinationDirectory = Path.Combine(_settings.DestinationRoot, matchingCategory.FolderName);
-            var matchingArchiveDestination = _archiveService.HandleArchive(filePath, matchingDestinationDirectory);
-            _statisticsService.RecordMovedFile(matchingArchiveDestination, matchingCategory.FolderName);
-            return;
-        }
-
-        var archiveDestinationDirectory = Path.Combine(_settings.DestinationRoot, _settings.ArchiveFolderName);
-        var archiveDestination = _archiveService.HandleArchive(filePath, archiveDestinationDirectory);
-        _statisticsService.RecordMovedFile(archiveDestination, categoryName);
-    }
-
-    private void RemoveExistingDistributionDirectory(string archivePath)
-    {
-        var archiveName = Path.GetFileNameWithoutExtension(archivePath) ?? string.Empty;
-        var potentialDistributionDirectory = Path.Combine(_settings.DestinationRoot, _settings.SoftFolderName, archiveName);
-        if (Directory.Exists(potentialDistributionDirectory))
-        {
-            _statisticsService.RecordDeletedDirectory(potentialDistributionDirectory);
-            Directory.Delete(potentialDistributionDirectory, recursive: true);
-        }
-    }
-
-    private IFileCategory? FindMatchingSiblingCategory(string archivePath)
-    {
-        var directory = Path.GetDirectoryName(archivePath);
-        var archiveName = Path.GetFileNameWithoutExtension(archivePath);
-
-        if (string.IsNullOrWhiteSpace(directory) || string.IsNullOrWhiteSpace(archiveName))
-        {
-            return null;
-        }
-
-        foreach (var siblingPath in Directory.EnumerateFileSystemEntries(directory))
-        {
-            if (string.Equals(siblingPath, archivePath, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var siblingName = Directory.Exists(siblingPath)
-                ? Path.GetFileName(siblingPath)
-                : Path.GetFileNameWithoutExtension(siblingPath);
-
-            if (!IsHalfNameMatch(archiveName, siblingName))
-            {
-                continue;
-            }
-
-            if (Directory.Exists(siblingPath))
-            {
-                var siblingCategory = _nonSplittableCategories
-                    .FirstOrDefault(category => category.IsNonSplittableDirectory(siblingPath));
-
-                if (siblingCategory is not null)
-                {
-                    return siblingCategory;
-                }
-
-                continue;
-            }
-
-            var matchedExtension = Path.GetExtension(siblingPath).ToLowerInvariant();
-            var category = _categories.FirstOrDefault(c => c.Matches(matchedExtension));
-            if (category is not null)
-            {
-                return category;
-            }
-        }
-
-        return null;
-    }
-
-    private static bool IsHalfNameMatch(string archiveName, string siblingName)
-    {
-        if (string.IsNullOrWhiteSpace(archiveName) || string.IsNullOrWhiteSpace(siblingName))
-        {
-            return false;
-        }
-
-        var compareLength = Math.Min(archiveName.Length, siblingName.Length) / 2;
-        if (compareLength == 0)
-        {
-            return false;
-        }
-
-        return archiveName
-            .AsSpan(0, compareLength)
-            .Equals(siblingName.AsSpan(0, compareLength), StringComparison.OrdinalIgnoreCase);
     }
 
     private void CleanEmptyDirectories(string root)
@@ -356,18 +305,6 @@ public sealed class FileOrganizerService
         var unknownDirectory = Path.Combine(_settings.DestinationRoot, _unknownCategory.FolderName, extensionFolderName);
         var destination = FileUtilities.MoveFile(filePath, unknownDirectory);
         _statisticsService.RecordMovedFile(destination, _unknownCategory.FolderName);
-    }
-
-    private bool IsSoftwareArchive(string archivePath)
-    {
-        if (_softwareArchiveKeywords.Length == 0)
-        {
-            return false;
-        }
-
-        var archiveName = Path.GetFileNameWithoutExtension(archivePath) ?? string.Empty;
-        return _softwareArchiveKeywords.Any(keyword =>
-            archiveName.Contains(keyword, StringComparison.OrdinalIgnoreCase));
     }
 
     private void ValidateCategoryExtensions()
