@@ -35,20 +35,20 @@ public sealed class DownloadsCleanupService : IDownloadsCleanupService
 
         if (string.Equals(normalizedDownloadsPath, normalizedDestinationPath, StringComparison.OrdinalIgnoreCase))
         {
-            _messageWriter.WriteLine("Папка загрузок уже используется как источник. Очистка не требуется.");
+            _messageWriter.WriteLine("Downloads folder is already used as the source. No cleanup required.");
             _messageWriter.WriteLine(string.Empty);
             return;
         }
 
         _messageWriter.WriteLine(
-            $"Переместить все файлы из \"{downloadsPath}\" в \"{destinationPath}\" для сортировки? (y/n)");
+            $"Move all files from \"{downloadsPath}\" to \"{destinationPath}\" for sorting? (y/n)");
 
         var key = Console.ReadKey(intercept: true).KeyChar;
         _messageWriter.WriteLine(string.Empty);
 
         if (char.ToLowerInvariant(key) != 'y')
         {
-            _messageWriter.WriteLine("Очистка папки загрузок пропущена.");
+            _messageWriter.WriteLine("Downloads folder cleanup skipped.");
             _messageWriter.WriteLine(string.Empty);
             return;
         }
@@ -68,7 +68,7 @@ public sealed class DownloadsCleanupService : IDownloadsCleanupService
             MoveEntry(entry, destination);
         }
 
-        _messageWriter.WriteLine("Папка загрузок очищена.");
+        _messageWriter.WriteLine("Downloads folder cleaned.");
         _messageWriter.WriteLine(string.Empty);
     }
 
