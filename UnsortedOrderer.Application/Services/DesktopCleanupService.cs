@@ -40,14 +40,14 @@ public sealed class DesktopCleanupService : IDesktopCleanupService
         }
 
         _messageWriter.WriteLine(
-            $"Программа запущена с рабочего стола. Переместить все файлы (кроме ярлыков программ) в папку \"{destinationPath}\"? (y/n)");
+            $"Application is running from the desktop. Move all files (except application shortcuts) to \"{destinationPath}\"? (y/n)");
 
         var key = Console.ReadKey(intercept: true).KeyChar;
         _messageWriter.WriteLine(string.Empty);
 
         if (char.ToLowerInvariant(key) != 'y')
         {
-            _messageWriter.WriteLine("Очистка рабочего стола пропущена.");
+            _messageWriter.WriteLine("Desktop cleanup skipped.");
             _messageWriter.WriteLine(string.Empty);
             return;
         }
@@ -72,8 +72,8 @@ public sealed class DesktopCleanupService : IDesktopCleanupService
             MoveEntry(entry, destination);
         }
 
-        _messageWriter.WriteLine("Рабочий стол очищен.");
-        _messageWriter.WriteLine("Нажмите любую клавишу для запуска основной программы.");
+        _messageWriter.WriteLine("Desktop cleaned.");
+        _messageWriter.WriteLine("Press any key to start the main program.");
         Console.ReadKey(intercept: true);
         _messageWriter.WriteLine(string.Empty);
     }
