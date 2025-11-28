@@ -6,10 +6,24 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyVersion>0.3.0</AssemblyVersion>
-    <FileVersion>0.3.0</FileVersion>
-    <TargetFileName>$(AssemblyName)-$(FileVersion).exe</TargetFileName>
+	  <MajorVersion>0</MajorVersion>
+	  <MinorVersion>3</MinorVersion>
+
+	  <!-- Build: день + месяц (01–3112) -->
+	  <BuildVersion>$([System.DateTime]::UtcNow.ToString('ddMM'))</BuildVersion>
+
+	  <!-- Revision: часы + минуты (0000–2359) -->
+	  <RevisionVersion>$([System.DateTime]::UtcNow.ToString('HHmm'))</RevisionVersion>
+
+	  <!-- Итоговая версия -->
+	  <Version>$(MajorVersion).$(MinorVersion).$(BuildVersion).$(RevisionVersion)</Version>
+
+	  <!-- Опционально: фиксированная AssemblyVersion для совместимости -->
+	  <AssemblyVersion>$(MajorVersion).$(MinorVersion).0.0</AssemblyVersion>
+	  <FileVersion>$(Version)</FileVersion>
+	  <TargetFileName>$(MajorVersion)-$(MinorVersion).exe</TargetFileName>
   </PropertyGroup>
+	
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
@@ -24,4 +38,33 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-</Project>
+	<Target Name="RenamePublishedMainFile" AfterTargets="Publish">
+		<PropertyGroup>
+			<!-- Версия, которую мы уже генерируем -->
+			<AppVersion>$(Version)</AppVersion>
+
+			<!-- Что реально получилось на выходе -->
+			<SourceFile>$(PublishDir)UnsortedOrderer.ConsoleApp.exe</SourceFile>
+
+			<!-- Новое имя файла с версией -->
+			<NewFile>$(PublishDir)$(AssemblyName)_v$(AppVersion).exe</NewFile>
+		</PropertyGroup>
+
+		<!-- Для дебага можно потом убрать -->
+		<Message Text="PublishDir = '$(PublishDir)'" Importance="High" />
+		<Message Text="SourceFile = '$(SourceFile)'" Importance="High" />
+		<Message Text="NewFile    = '$(NewFile)'" Importance="High" />
+
+		<Move
+		  SourceFiles="$(SourceFile)"
+		  DestinationFiles="$(NewFile)"
+		  Condition="Exists('$(SourceFile)')" />
+
+		<!-- Удаляем все PDB в publish-папке -->
+		<ItemGroup>
+			<PdbFiles Include="$(PublishDir)**/*.pdb" />
+		</ItemGroup>
+
+		<Delete Files="@(PdbFiles)" />
+	</Target>
+	</Project>
