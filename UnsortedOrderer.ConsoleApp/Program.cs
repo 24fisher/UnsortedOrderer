@@ -32,6 +32,10 @@ try
         .GetRequiredService<IDesktopCleanupService>()
         .CleanIfRunningFromDesktop(settings.SourceDirectory);
 
+    serviceProvider
+        .GetRequiredService<IDownloadsCleanupService>()
+        .CleanDownloadsIfRequested(settings.SourceDirectory);
+
     var application = serviceProvider.GetRequiredService<FileOrganizerApplication>();
     application.Run();
 }

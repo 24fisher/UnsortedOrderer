@@ -39,3 +39,8 @@
 - Empty directories are removed after processing.
 
 Run the app from the repository root with `dotnet run --project UnsortedOrderer.ConsoleApp/UnsortedOrderer.ConsoleApp.csproj` after verifying paths in `appsettings.json` are correct.
+
+## Startup prompts
+
+- If you launch the app from the Windows desktop, it offers to move everything (except program shortcuts, the running executable, and `appsettings.json`) into the configured source directory before starting.
+- On startup, the app can also move every file from the current user's Windows Downloads folder into the source directory for sorting if you confirm the prompt.
