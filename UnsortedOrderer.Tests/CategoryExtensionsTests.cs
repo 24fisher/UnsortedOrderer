@@ -50,7 +50,9 @@ public class CategoryExtensionsTests
             new FirmwareCategory("Firmware"),
             new MetadataCategory("Metadata"),
             new DriversCategory("Drivers"),
-            new RepositoriesCategory("Repositories", new RepositoryDetector()),
+            new RepositoriesCategory(
+                "Repositories",
+                new RepositoryDetector(RepositoriesCategory.CodeExtensions, 3)),
             new SoftCategory("Soft", new SoftwareDistributivesDetector()),
             new UnknownCategory("Unknown"),
         };

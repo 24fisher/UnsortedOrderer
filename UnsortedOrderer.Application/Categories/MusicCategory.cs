@@ -17,7 +17,8 @@ public sealed class MusicCategory : FileCategory, INonSplittableDirectoryCategor
     public MusicCategory(string folderName, IMusicDirectoryDetector musicDirectoryDetector)
         : base("Music", folderName, MusicExtensions)
     {
-        _musicCategoryParsingService = musicDirectoryDetector;
+        _musicCategoryParsingService = musicDirectoryDetector as IFileCategoryParsingService
+            ?? throw new ArgumentNullException(nameof(musicDirectoryDetector), "IMusicDirectoryDetector должен реализовывать IFileCategoryParsingService.");
     }
 
     public bool IsNonSplittableDirectory(string path)
