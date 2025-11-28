@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnsortedOrderer.Categories;
+using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
@@ -27,9 +28,9 @@ public class CategoryExtensionsTests
             $"Category extensions overlap: {string.Join("; ", overlapDetails)}");
     }
 
-    private static IReadOnlyCollection<IFileCategory> CreateCategories()
+    private static IReadOnlyCollection<ICategory> CreateCategories()
     {
-        return new IFileCategory[]
+        return new ICategory[]
         {
             new PhotosCategory("Photos"),
             new ImagesCategory("Images"),
@@ -49,8 +50,8 @@ public class CategoryExtensionsTests
             new FirmwareCategory("Firmware"),
             new MetadataCategory("Metadata"),
             new DriversCategory("Drivers"),
-            new RepositoriesCategory("Repositories"),
-            new SoftCategory("Soft"),
+            new RepositoriesCategory("Repositories", new RepositoryDetector()),
+            new SoftCategory("Soft", new SoftwareDistributivesDetector()),
             new UnknownCategory("Unknown"),
         };
     }
@@ -81,10 +82,10 @@ public class CategoryExtensionsTests
         public bool IsMusicDirectory(string path) => false;
     }
 
-    private static IReadOnlyDictionary<string, IReadOnlyCollection<IFileCategory>> FindExtensionOverlaps(
-        IEnumerable<IFileCategory> categories)
+    private static IReadOnlyDictionary<string, IReadOnlyCollection<ICategory>> FindExtensionOverlaps(
+        IEnumerable<ICategory> categories)
     {
-        var lookup = new Dictionary<string, HashSet<IFileCategory>>(StringComparer.OrdinalIgnoreCase);
+        var lookup = new Dictionary<string, HashSet<ICategory>>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var category in categories)
         {
@@ -92,7 +93,7 @@ public class CategoryExtensionsTests
             {
                 if (!lookup.TryGetValue(extension, out var categorySet))
                 {
-                    categorySet = new HashSet<IFileCategory>();
+                    categorySet = new HashSet<ICategory>();
                     lookup[extension] = categorySet;
                 }
 
@@ -104,7 +105,7 @@ public class CategoryExtensionsTests
             .Where(kvp => kvp.Value.Count > 1)
             .ToDictionary(
                 kvp => kvp.Key,
-                kvp => (IReadOnlyCollection<IFileCategory>)kvp.Value.ToArray(),
+                kvp => (IReadOnlyCollection<ICategory>)kvp.Value.ToArray(),
                 StringComparer.OrdinalIgnoreCase);
     }
 }

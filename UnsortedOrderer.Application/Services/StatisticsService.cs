@@ -7,7 +7,7 @@ namespace UnsortedOrderer.Services;
 public sealed class StatisticsService : IStatisticsService
 {
     private readonly IMessageWriter _messageWriter;
-    private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly IReadOnlyCollection<ICategory> _categories;
     private readonly Dictionary<string, int> _movedFilesByCategory;
     private readonly HashSet<string> _deletedDirectories = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _unknownExtensions = new(StringComparer.OrdinalIgnoreCase);
@@ -17,7 +17,7 @@ public sealed class StatisticsService : IStatisticsService
     private int _totalUnknownFiles;
     private int _totalDeletedFiles;
 
-    public StatisticsService(IEnumerable<IFileCategory> categories, IMessageWriter messageWriter)
+    public StatisticsService(IEnumerable<ICategory> categories, IMessageWriter messageWriter)
     {
         _categories = categories.ToArray();
         _messageWriter = messageWriter;

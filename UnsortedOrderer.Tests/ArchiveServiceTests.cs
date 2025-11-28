@@ -49,7 +49,7 @@ public sealed class ArchiveServiceTests
             softwareArchiveKeywords: Array.Empty<string>());
 
         var statistics = new NullStatisticsService();
-        var service = new ArchiveService(settings, Array.Empty<IFileCategory>(), statistics);
+        var service = new ArchiveService(settings, Array.Empty<ICategory>(), statistics);
 
         var movedArchivePath = service.HandleArchive(archivePath, destinationDirectory);
 

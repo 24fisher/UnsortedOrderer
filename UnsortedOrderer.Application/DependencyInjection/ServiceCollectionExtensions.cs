@@ -39,7 +39,7 @@ public static class ServiceCollectionExtensions
             provider => provider.GetRequiredService<RepositoryDetector>());
         services.AddSingleton<IFileCategoryParsingService>(
             provider => provider.GetRequiredService<SoftwareDistributivesDetector>());
-        services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
+        services.AddSingleton<IEnumerable<ICategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
             var cameraFileNamePatternService = provider.GetRequiredService<IEnumerable<ICameraFileNamePatternService>>();
@@ -48,7 +48,7 @@ public static class ServiceCollectionExtensions
             var musicDirectoryDetector = provider.GetRequiredService<IMusicDirectoryDetector>();
             var repositoryDetector = provider.GetRequiredService<RepositoryDetector>();
             var softwareDistributivesDetector = provider.GetRequiredService<SoftwareDistributivesDetector>();
-            return new IFileCategory[]
+            return new ICategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),
                 new ImagesCategory(appSettings.ImagesFolderName),

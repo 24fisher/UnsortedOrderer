@@ -25,7 +25,7 @@ internal sealed class SpecialCategoriesHandler
             .ToArray();
     }
 
-    public IFileCategory? TryGetSpecialCategory(string filePath, string extension)
+    public ICategory? TryGetSpecialCategory(string filePath, string extension)
     {
         if (_imageCategories.Count == 0 || _documentsCategory is null)
         {

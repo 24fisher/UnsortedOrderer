@@ -10,14 +10,14 @@ namespace UnsortedOrderer.Services;
 public sealed class ArchiveService : IArchiveService
 {
     private readonly AppSettings _settings;
-    private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly IReadOnlyCollection<ICategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IStatisticsService _statisticsService;
     private readonly string[] _softwareArchiveKeywords;
 
     public ArchiveService(
         AppSettings settings,
-        IEnumerable<IFileCategory> categories,
+        IEnumerable<ICategory> categories,
         IStatisticsService statisticsService)
     {
         _settings = settings;
@@ -86,7 +86,7 @@ public sealed class ArchiveService : IArchiveService
         }
     }
 
-    private IFileCategory? FindMatchingSiblingCategory(string archivePath)
+    private ICategory? FindMatchingSiblingCategory(string archivePath)
     {
         var directory = Path.GetDirectoryName(archivePath);
         var archiveName = Path.GetFileNameWithoutExtension(archivePath);

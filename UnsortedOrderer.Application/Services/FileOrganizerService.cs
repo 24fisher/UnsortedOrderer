@@ -14,7 +14,7 @@ public sealed class FileOrganizerService
     private readonly IMessengerPathService _messengerPathService;
     private readonly IMessageWriter _messageWriter;
     private readonly IStatisticsService _statisticsService;
-    private readonly IReadOnlyCollection<IFileCategory> _categories;
+    private readonly IReadOnlyCollection<ICategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
     private readonly DocumentsCategory? _documentsCategory;
@@ -33,7 +33,7 @@ public sealed class FileOrganizerService
         IArchiveService archiveService,
         IPhotoService photoService,
         IMessengerPathService messengerPathService,
-        IEnumerable<IFileCategory> categories,
+        IEnumerable<ICategory> categories,
         IEnumerable<IFileCategoryParsingService> categoryParsingServices,
         IStatisticsService statisticsService,
         IMessageWriter messageWriter)
@@ -189,7 +189,7 @@ public sealed class FileOrganizerService
         }
     }
 
-    private IFileCategory? ResolveCategory(string filePath, string extension)
+    private ICategory? ResolveCategory(string filePath, string extension)
     {
         if (_driversCategory is not null && _driversCategory.IsDriverFile(filePath))
         {
@@ -219,7 +219,7 @@ public sealed class FileOrganizerService
             : null;
     }
 
-    private IFileCategory? TryResolveWithParsingServices(string filePath, string extension)
+    private ICategory? TryResolveWithParsingServices(string filePath, string extension)
     {
         var matchingCategories = _categories
             .Where(category => category.Matches(extension))
@@ -246,7 +246,7 @@ public sealed class FileOrganizerService
 
     private static bool IsFileOfCategory(
         IFileCategoryParsingService parsingService,
-        IFileCategory category,
+        ICategory category,
         string filePath)
     {
         var methodInfo = parsingService
@@ -309,7 +309,7 @@ public sealed class FileOrganizerService
 
     private void ValidateCategoryExtensions()
     {
-        var extensionToCategories = new Dictionary<string, List<IFileCategory>>(StringComparer.OrdinalIgnoreCase);
+        var extensionToCategories = new Dictionary<string, List<ICategory>>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var category in _categories)
         {
@@ -317,7 +317,7 @@ public sealed class FileOrganizerService
             {
                 if (!extensionToCategories.TryGetValue(extension, out var categories))
                 {
-                    categories = new List<IFileCategory>();
+                    categories = new List<ICategory>();
                     extensionToCategories[extension] = categories;
                 }
 

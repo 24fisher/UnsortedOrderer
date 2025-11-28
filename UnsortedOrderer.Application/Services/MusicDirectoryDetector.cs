@@ -61,14 +61,14 @@ public sealed class MusicDirectoryDetector : IMusicDirectoryDetector, IFileCateg
     }
 
     public bool IsFileOfCategory<TCategory>(string filePath)
-        where TCategory : IFileCategory
+        where TCategory : ICategory
     {
         return typeof(TCategory) == typeof(MusicCategory)
             && _musicExtensions.Contains(Path.GetExtension(filePath));
     }
 
     public bool IsFolderOfCategory<TCategory>(string folderPath)
-        where TCategory : IFileCategory
+        where TCategory : ICategory
     {
         return typeof(TCategory) == typeof(MusicCategory) && IsMusicDirectory(folderPath);
     }

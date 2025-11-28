@@ -49,7 +49,7 @@ public class FileOrganizerServiceTests
             cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
             softwareArchiveKeywords: Array.Empty<string>());
 
-        var categories = new IFileCategory[]
+        var categories = new ICategory[]
         {
             new RepositoriesCategory(settings.RepositoriesFolderName),
             new UnknownCategory(settings.UnknownFolderName)
@@ -107,7 +107,7 @@ public class FileOrganizerServiceTests
             cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
             softwareArchiveKeywords: Array.Empty<string>());
 
-        var categories = new IFileCategory[]
+        var categories = new ICategory[]
         {
             new MusicCategory(settings.MusicFolderName, new MusicDirectoryDetector()),
             new UnknownCategory(settings.UnknownFolderName)
@@ -163,7 +163,7 @@ public class FileOrganizerServiceTests
             cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
             softwareArchiveKeywords: Array.Empty<string>());
 
-        var categories = new IFileCategory[]
+        var categories = new ICategory[]
         {
             new ThreeDModelsCategory(),
             new ArchivesCategory(settings.ArchiveFolderName),
@@ -226,7 +226,7 @@ public class FileOrganizerServiceTests
             cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
             softwareArchiveKeywords: Array.Empty<string>());
 
-        var categories = new IFileCategory[]
+        var categories = new ICategory[]
         {
             new ArchivesCategory(settings.ArchiveFolderName),
             new UnknownCategory(settings.UnknownFolderName)

@@ -2,7 +2,7 @@ using UnsortedOrderer.Contracts.Categories;
 
 namespace UnsortedOrderer.Categories;
 
-public abstract class FileCategory : IFileCategory
+public abstract class FileCategory : ICategory
 {
     protected FileCategory(string name, string folderName, IEnumerable<string> extensions)
     {

@@ -1,6 +1,6 @@
 namespace UnsortedOrderer.Contracts.Categories;
 
-public interface INonSplittableDirectoryCategory : IFileCategory
+public interface INonSplittableDirectoryCategory : ICategory
 {
     bool IsNonSplittableDirectory(string path);
 

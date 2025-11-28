@@ -9,25 +9,25 @@ internal sealed class CategoryCache
     /// Provides cached extension lookups for all categories, keeping image-specific extension logic
     /// available while avoiding repeated scans across the full category list.
     /// </summary>
-    public IReadOnlyDictionary<string, IFileCategory> CategoriesByExtension { get; }
+    public IReadOnlyDictionary<string, ICategory> CategoriesByExtension { get; }
 
     public HashSet<string> ImageCategoryExtensions { get; }
 
-    public CategoryCache(IEnumerable<IFileCategory> categories)
+    public CategoryCache(IEnumerable<ICategory> categories)
     {
         var categoryArray = categories.ToArray();
         var imageCategories = categoryArray.OfType<ImageCategoryBase>().ToArray();
-        var imageCategorySet = new HashSet<IFileCategory>(imageCategories.Cast<IFileCategory>());
+        var imageCategorySet = new HashSet<ICategory>(imageCategories.Cast<ICategory>());
 
         CategoriesByExtension = BuildCategoryExtensionLookup(categoryArray, imageCategorySet);
         ImageCategoryExtensions = BuildImageExtensionSet(imageCategories);
     }
 
-    private static IReadOnlyDictionary<string, IFileCategory> BuildCategoryExtensionLookup(
-        IEnumerable<IFileCategory> categories,
-        IReadOnlySet<IFileCategory> imageCategorySet)
+    private static IReadOnlyDictionary<string, ICategory> BuildCategoryExtensionLookup(
+        IEnumerable<ICategory> categories,
+        IReadOnlySet<ICategory> imageCategorySet)
     {
-        var lookup = new Dictionary<string, IFileCategory>(StringComparer.OrdinalIgnoreCase);
+        var lookup = new Dictionary<string, ICategory>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var category in categories)
         {

@@ -42,7 +42,7 @@ public class ServiceCollectionExtensionsTests
             .BuildServiceProvider();
 
         var categories = provider
-            .GetRequiredService<IEnumerable<IFileCategory>>()
+            .GetRequiredService<IEnumerable<ICategory>>()
             .OfType<INonSplittableDirectoryCategory>()
             .ToArray();
 

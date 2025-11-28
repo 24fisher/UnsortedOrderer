@@ -96,7 +96,7 @@ public sealed class RepositoryDetector : IFileCategoryParsingService
     }
 
     public bool IsFileOfCategory<TCategory>(string filePath)
-        where TCategory : IFileCategory
+        where TCategory : ICategory
     {
         if (typeof(TCategory) != typeof(RepositoriesCategory))
         {
@@ -120,7 +120,7 @@ public sealed class RepositoryDetector : IFileCategoryParsingService
     }
 
     public bool IsFolderOfCategory<TCategory>(string folderPath)
-        where TCategory : IFileCategory
+        where TCategory : ICategory
     {
         return typeof(TCategory) == typeof(RepositoriesCategory) && IsRepositoryDirectory(folderPath);
     }

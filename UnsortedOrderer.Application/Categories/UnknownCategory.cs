@@ -2,7 +2,7 @@ using UnsortedOrderer.Contracts.Categories;
 
 namespace UnsortedOrderer.Categories;
 
-public sealed class UnknownCategory : IFileCategory
+public sealed class UnknownCategory : ICategory
 {
     public UnknownCategory(string folderName)
     {

@@ -1,6 +1,6 @@
 namespace UnsortedOrderer.Contracts.Categories;
 
-public interface IFileCategory
+public interface ICategory
 {
     string Name { get; }
 

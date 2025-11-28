@@ -70,13 +70,13 @@ public sealed class PhotoService : IPhotoService, IFileCategoryParsingService
     }
 
     public bool IsFileOfCategory<TCategory>(string filePath)
-        where TCategory : IFileCategory
+        where TCategory : ICategory
     {
         return typeof(TCategory) == typeof(PhotosCategory) && IsPhoto(filePath);
     }
 
     public bool IsFolderOfCategory<TCategory>(string folderPath)
-        where TCategory : IFileCategory
+        where TCategory : ICategory
     {
         return false;
     }
