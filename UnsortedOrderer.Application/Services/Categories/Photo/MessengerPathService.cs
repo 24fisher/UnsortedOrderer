@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 using Path = System.IO.Path;
 
-namespace UnsortedOrderer.Application.Services.Categories.Photo;
+namespace UnsortedOrderer.Services;
 
 public sealed class MessengerPathService : IMessengerPathService
 {

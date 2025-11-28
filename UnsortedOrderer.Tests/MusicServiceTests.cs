@@ -1,17 +1,17 @@
 using System;
 using System.IO;
-using UnsortedOrderer.Services;
+using UnsortedOrderer.Application.Services.Categories;
 using Xunit;
 
 namespace UnsortedOrderer.Tests;
 
-public class MusicDirectoryDetectorTests
+public class MusicServiceTests
 {
     [Fact]
     public void DirectoryWithMusicArtworkAndHiddenFiles_IsDetected()
     {
         using var directory = new TempDirectory();
-        var detector = new MusicDirectoryDetector();
+        var service = new MusicService();
 
         File.WriteAllText(Path.Combine(directory.Path, "song.mp3"), "");
         File.WriteAllText(Path.Combine(directory.Path, "cover.jpg"), "");
@@ -20,44 +20,44 @@ public class MusicDirectoryDetectorTests
         File.WriteAllText(Path.Combine(directory.Path, ".DS_Store"), "");
         File.WriteAllText(Path.Combine(directory.Path, "thumbs.db"), "");
 
-        Assert.True(detector.IsMusicDirectory(directory.Path));
+        Assert.True(service.IsMusicDirectory(directory.Path));
     }
 
     [Fact]
     public void NestedDirectoriesWithMusic_AreDetected()
     {
         using var directory = new TempDirectory();
-        var detector = new MusicDirectoryDetector();
+        var service = new MusicService();
 
         var disc1 = Directory.CreateDirectory(Path.Combine(directory.Path, "Disc 1"));
         File.WriteAllText(Path.Combine(disc1.FullName, "intro.flac"), "");
         File.WriteAllText(Path.Combine(disc1.FullName, "artwork.png"), "");
 
-        Assert.True(detector.IsMusicDirectory(directory.Path));
+        Assert.True(service.IsMusicDirectory(directory.Path));
     }
 
     [Fact]
     public void DirectoryWithNonMusicFile_IsNotDetected()
     {
         using var directory = new TempDirectory();
-        var detector = new MusicDirectoryDetector();
+        var service = new MusicService();
 
         File.WriteAllText(Path.Combine(directory.Path, "song.m4a"), "");
         File.WriteAllText(Path.Combine(directory.Path, "notes.pdf"), "");
 
-        Assert.False(detector.IsMusicDirectory(directory.Path));
+        Assert.False(service.IsMusicDirectory(directory.Path));
     }
 
     [Fact]
     public void DirectoryWithoutMusicFiles_IsNotDetected()
     {
         using var directory = new TempDirectory();
-        var detector = new MusicDirectoryDetector();
+        var service = new MusicService();
 
         File.WriteAllText(Path.Combine(directory.Path, "cover.jpeg"), "");
         File.WriteAllText(Path.Combine(directory.Path, "playlist.txt"), "");
 
-        Assert.False(detector.IsMusicDirectory(directory.Path));
+        Assert.False(service.IsMusicDirectory(directory.Path));
     }
 
     private sealed class TempDirectory : IDisposable
