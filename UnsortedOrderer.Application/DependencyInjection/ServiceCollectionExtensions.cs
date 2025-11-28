@@ -26,17 +26,19 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IVideoDateService, VideoDateService>();
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
+        services.AddSingleton<IMusicDirectoryDetector, MusicDirectoryDetector>();
         services.AddSingleton<IEnumerable<IFileCategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
             var cameraFileNamePatternService = provider.GetRequiredService<IEnumerable<ICameraFileNamePatternService>>();
             var messengerPathService = provider.GetRequiredService<IMessengerPathService>();
             var videoDateService = provider.GetRequiredService<IVideoDateService>();
+            var musicDirectoryDetector = provider.GetRequiredService<IMusicDirectoryDetector>();
             return new IFileCategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),
                 new ImagesCategory(appSettings.ImagesFolderName),
-                new MusicCategory(appSettings.MusicFolderName),
+                new MusicCategory(appSettings.MusicFolderName, musicDirectoryDetector),
                 new MusicalInstrumentsCategory(appSettings.MusicalInstrumentsFolderName),
                 new EBooksCategory(appSettings.EBooksFolderName),
                 new DocumentsCategory(),

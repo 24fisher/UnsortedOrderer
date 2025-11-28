@@ -30,6 +30,7 @@
 - Disk images (`.iso`, `.cso`, `.dmg`, `.img`, `.mdf`, `.mds`, `.nrg`, `.ccd`, `.isz`, `.vhd`, `.vhdx`) are placed in the `_Disk images` subfolder inside the software directory.
 - Configuration files (`.conf`) are stored under `Soft/_Configuration_files`, and XML files (`.xml`) go to `Soft/_Xml_files` within the software directory.
 - Repositories and source folders are moved whole into `RepositoriesFolderName` without per-file sorting. Detection reacts to `.git`, common manifests (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, etc.), or the presence of several source files (`.cs`, `.ts`, `.js`, `.py`, `.java`, `.cpp`, `.rs`, and more).
+- Music album directories that contain only audio files, album artwork images, and optional track lists are moved intact into `MusicFolderName` even if they include hidden files like `thumbs.db`.
 - When a repository folder is wrapped in one or more parent directories (for example, after extracting an archive), the sorter unwraps those shells and moves only the repository directory itself into `RepositoriesFolderName`.
 - The list of extensions to delete is defined in `appsettings.json` (by default `.lnk`, `.torrent`, `.tmp`, `.ini`).
 - Installer directories are detected separately and moved intact into the software folder without unpacking.

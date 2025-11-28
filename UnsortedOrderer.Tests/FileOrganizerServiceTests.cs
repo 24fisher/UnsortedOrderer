@@ -193,6 +193,61 @@ public class FileOrganizerServiceTests
     }
 
     [Fact]
+    public void MusicDirectory_IsMovedWhole()
+    {
+        using var source = new TempDirectory();
+        using var destination = new TempDirectory();
+
+        var albumDirectory = System.IO.Path.Combine(source.Path, "Album");
+        Directory.CreateDirectory(albumDirectory);
+        File.WriteAllText(System.IO.Path.Combine(albumDirectory, "track01.mp3"), "");
+        File.WriteAllText(System.IO.Path.Combine(albumDirectory, "cover.png"), "");
+
+        var settings = new AppSettings(
+            source.Path,
+            destination.Path,
+            softFolderName: "Soft",
+            archiveFolderName: "Archives",
+            imagesFolderName: "Images",
+            photosFolderName: "Photos",
+            musicFolderName: "Music",
+            musicalInstrumentsFolderName: "Instruments",
+            eBooksFolderName: "EBooks",
+            repositoriesFolderName: "Repositories",
+            driversFolderName: "Drivers",
+            firmwareFolderName: "Firmware",
+            metadataFolderName: "Metadata",
+            webFolderName: "Web",
+            graphicsFolderName: "Graphics",
+            unknownFolderName: "Unknown",
+            deletedExtensions: Array.Empty<string>(),
+            documentImageKeywords: Array.Empty<string>(),
+            cameraFileNamePatterns: Array.Empty<DeviceBrandPattern>(),
+            softwareArchiveKeywords: Array.Empty<string>());
+
+        var categories = new IFileCategory[]
+        {
+            new MusicCategory(settings.MusicFolderName, new MusicDirectoryDetector()),
+            new UnknownCategory(settings.UnknownFolderName)
+        };
+
+        var organizer = new FileOrganizerService(
+            settings,
+            new StubArchiveService(),
+            new StubPhotoService(isPhoto: false),
+            new StubMessengerPathService(),
+            categories,
+            new RecordingStatisticsService(),
+            new StubMessageWriter());
+
+        InvokeProcessDirectory(organizer, source.Path);
+
+        var expectedAlbumPath = System.IO.Path.Combine(destination.Path, settings.MusicFolderName, "Album");
+        Assert.True(Directory.Exists(expectedAlbumPath));
+        Assert.False(Directory.Exists(albumDirectory));
+    }
+
+    [Fact]
     public void ArchiveFollowsSiblingCategory_WhenSiblingIsMovedFirst()
     {
         using var source = new TempDirectory();
