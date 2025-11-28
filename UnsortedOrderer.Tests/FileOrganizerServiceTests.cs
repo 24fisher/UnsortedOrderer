@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using UnsortedOrderer.Application.Contracts.Services.Categories;
 using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
+using UnsortedOrderer.Application.Services.Categories;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
@@ -111,7 +112,7 @@ public class FileOrganizerServiceTests
 
         var categories = new ICategory[]
         {
-            new MusicCategory(settings.MusicFolderName, new MusicDirectoryDetector()),
+            new MusicCategory(settings.MusicFolderName, new MusicService()),
             new UnknownCategory(settings.UnknownFolderName)
         };
 
