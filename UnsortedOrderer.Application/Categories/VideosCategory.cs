@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnsortedOrderer.Application.Contracts.Services.Categories;
 using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
@@ -14,6 +16,8 @@ public sealed class VideosCategory : FileCategory, INonSplittableDirectoryCatego
     [
         ".mp4", ".mov", ".avi", ".mkv", ".wmv", ".flv", ".webm", ".mpeg"
     ];
+
+    internal static IReadOnlyCollection<string> SupportedExtensions => VideoExtensions;
 
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
     private readonly IVideoDateService _videoDateService;

@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDownloadsCleanupService, DownloadsCleanupService>();
         services.AddSingleton<IPhotoCameraMetadataService, PhotoCameraMetadataService>();
         services.AddSingleton<IVideoDateService, VideoDateService>();
+        services.AddSingleton<VideoParsingService>();
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
         services.AddSingleton<IMusicDirectoryDetector, MusicDirectoryDetector>();
@@ -47,6 +48,8 @@ public static class ServiceCollectionExtensions
             provider => provider.GetRequiredService<SoftwareDistributivesDetector>());
         services.AddSingleton<ICategoryParsingService>(
             provider => provider.GetRequiredService<DocumentImageParsingService>());
+        services.AddSingleton<ICategoryParsingService>(
+            provider => provider.GetRequiredService<VideoParsingService>());
         services.AddSingleton<IEnumerable<ICategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
