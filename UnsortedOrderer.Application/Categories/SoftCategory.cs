@@ -9,7 +9,7 @@ public sealed class SoftCategory : FileCategory, INonSplittableDirectoryCategory
     private const string ConfigurationFilesFolderName = "_Configuration_files";
     private const string XmlFilesFolderName = "_Xml_files";
 
-    private static readonly SoftwareDistributivesDetector DistributionDetector = new();
+    private readonly SoftwareDistributivesDetector _distributionDetector;
     private static readonly string[] DiskImageExtensions =
     {
         ".iso",
@@ -42,14 +42,15 @@ public sealed class SoftCategory : FileCategory, INonSplittableDirectoryCategory
         .Concat(DiskImageExtensions)
         .ToArray();
 
-    public SoftCategory(string folderName)
+    public SoftCategory(string folderName, SoftwareDistributivesDetector distributionDetector)
         : base("Soft", folderName, SoftExtensions)
     {
+        _distributionDetector = distributionDetector;
     }
 
     public bool IsNonSplittableDirectory(string path)
     {
-        return DistributionDetector.IsDistributionDirectory(path);
+        return _distributionDetector.IsFolderOfCategory<SoftCategory>(path);
     }
 
     public string GetDirectoryDestination(string destinationRoot, string directoryPath)

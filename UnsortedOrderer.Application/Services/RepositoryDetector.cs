@@ -1,6 +1,10 @@
+using UnsortedOrderer.Categories;
+using UnsortedOrderer.Contracts.Categories;
+using UnsortedOrderer.Contracts.Services;
+
 namespace UnsortedOrderer.Services;
 
-public sealed class RepositoryDetector
+public sealed class RepositoryDetector : IFileCategoryParsingService
 {
     private const int DefaultMinimumCodeFiles = 3;
 
@@ -89,6 +93,36 @@ public sealed class RepositoryDetector
         }
 
         return repositoryPath;
+    }
+
+    public bool IsFileOfCategory<TCategory>(string filePath)
+        where TCategory : IFileCategory
+    {
+        if (typeof(TCategory) != typeof(RepositoriesCategory))
+        {
+            return false;
+        }
+
+        var fileName = Path.GetFileName(filePath);
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        if (RepositoryManifestFiles.Any(manifest =>
+                fileName.Equals(manifest, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        var extension = Path.GetExtension(filePath);
+        return !string.IsNullOrWhiteSpace(extension) && _codeExtensions.Contains(extension.ToLowerInvariant());
+    }
+
+    public bool IsFolderOfCategory<TCategory>(string folderPath)
+        where TCategory : IFileCategory
+    {
+        return typeof(TCategory) == typeof(RepositoriesCategory) && IsRepositoryDirectory(folderPath);
     }
 
     private static string NormalizeExtension(string extension)

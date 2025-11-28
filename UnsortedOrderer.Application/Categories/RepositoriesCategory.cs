@@ -5,7 +5,7 @@ namespace UnsortedOrderer.Categories;
 
 public sealed class RepositoriesCategory : FileCategory, INonSplittableDirectoryCategory
 {
-    private static readonly string[] CodeExtensions =
+    public static readonly string[] CodeExtensions =
     {
         ".cs",
         ".fs",
@@ -34,16 +34,17 @@ public sealed class RepositoriesCategory : FileCategory, INonSplittableDirectory
         ".scala"
     };
 
-    private readonly RepositoryDetector _repositoryDetector = new(CodeExtensions);
+    private readonly RepositoryDetector _repositoryDetector;
 
-    public RepositoriesCategory(string folderName)
+    public RepositoriesCategory(string folderName, RepositoryDetector repositoryDetector)
         : base("Repositories", folderName, CodeExtensions)
     {
+        _repositoryDetector = repositoryDetector;
     }
 
     public bool IsNonSplittableDirectory(string path)
     {
-        return GetRepositoryRoot(path) is not null;
+        return _repositoryDetector.IsFolderOfCategory<RepositoriesCategory>(path);
     }
 
     public string? GetRepositoryRoot(string path)

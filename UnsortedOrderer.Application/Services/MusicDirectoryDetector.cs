@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Categories;
 
 namespace UnsortedOrderer.Services;
 
-public sealed class MusicDirectoryDetector : IMusicDirectoryDetector
+public sealed class MusicDirectoryDetector : IMusicDirectoryDetector, IFileCategoryParsingService
 {
     private static readonly HashSet<string> OptionalTextExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -57,6 +58,19 @@ public sealed class MusicDirectoryDetector : IMusicDirectoryDetector
         }
 
         return hasMusicFile;
+    }
+
+    public bool IsFileOfCategory<TCategory>(string filePath)
+        where TCategory : IFileCategory
+    {
+        return typeof(TCategory) == typeof(MusicCategory)
+            && _musicExtensions.Contains(Path.GetExtension(filePath));
+    }
+
+    public bool IsFolderOfCategory<TCategory>(string folderPath)
+        where TCategory : IFileCategory
+    {
+        return typeof(TCategory) == typeof(MusicCategory) && IsMusicDirectory(folderPath);
     }
 
     private static bool IsIgnorable(string filePath)
