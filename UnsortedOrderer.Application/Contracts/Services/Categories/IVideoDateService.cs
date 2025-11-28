@@ -1,6 +1,6 @@
 using System;
 
-namespace UnsortedOrderer.Contracts.Services;
+namespace UnsortedOrderer.Application.Contracts.Services.Categories;
 
 public interface IVideoDateService
 {

@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using UnsortedOrderer.Contracts.Services;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 using UnsortedOrderer.Models;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories.Photo;
 
 public abstract class CameraFileNamePatternService : ICameraFileNamePatternService
 {

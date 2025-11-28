@@ -2,9 +2,9 @@ using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories;
 
-public sealed class RepositoryDetector : IFileCategoryParsingService
+public sealed class RepositoryDetector : ICategoryParsingService
 {
     private const int DefaultMinimumCodeFiles = 3;
 

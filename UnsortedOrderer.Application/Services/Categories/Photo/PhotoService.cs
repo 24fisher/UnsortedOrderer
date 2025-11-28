@@ -6,9 +6,12 @@ using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
-namespace UnsortedOrderer.Services;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
+using UnsortedOrderer.Services;
 
-public sealed class PhotoService : IPhotoService, IFileCategoryParsingService
+namespace UnsortedOrderer.Application.Services.Categories.Photo;
+
+public sealed class PhotoService : IPhotoService, ICategoryParsingService
 {
     private readonly ICameraFileNamePatternService _cameraFileNamePatternService;
     private readonly IPhotoCameraMetadataService _photoCameraMetadataService;

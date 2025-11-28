@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnsortedOrderer.Models;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories.Photo;
 
 public sealed class PhotoCameraFileNamePatternService : CameraFileNamePatternService
 {

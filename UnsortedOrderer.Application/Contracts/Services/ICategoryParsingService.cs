@@ -2,7 +2,7 @@ using UnsortedOrderer.Contracts.Categories;
 
 namespace UnsortedOrderer.Contracts.Services;
 
-public interface IFileCategoryParsingService
+public interface ICategoryParsingService
 {
     bool IsFileOfCategory<TCategory>(string filePath)
         where TCategory : ICategory;

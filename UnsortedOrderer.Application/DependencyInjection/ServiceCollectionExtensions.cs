@@ -1,6 +1,11 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using UnsortedOrderer.Application.Application;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
+using UnsortedOrderer.Application.Services.Categories;
+using UnsortedOrderer.Application.Services.Categories.Photo;
+using UnsortedOrderer.Application.Services.Categories.Video;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
@@ -32,15 +37,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<SoftwareDistributivesDetector>();
         services.AddSingleton<DocumentImageParsingService>();
 
-        services.AddSingleton<IFileCategoryParsingService>(
-            provider => (IFileCategoryParsingService)provider.GetRequiredService<IPhotoService>());
-        services.AddSingleton<IFileCategoryParsingService>(
-            provider => (IFileCategoryParsingService)provider.GetRequiredService<IMusicDirectoryDetector>());
-        services.AddSingleton<IFileCategoryParsingService>(
+        services.AddSingleton<ICategoryParsingService>(
+            provider => (ICategoryParsingService)provider.GetRequiredService<IPhotoService>());
+        services.AddSingleton<ICategoryParsingService>(
+            provider => (ICategoryParsingService)provider.GetRequiredService<IMusicDirectoryDetector>());
+        services.AddSingleton<ICategoryParsingService>(
             provider => provider.GetRequiredService<RepositoryDetector>());
-        services.AddSingleton<IFileCategoryParsingService>(
+        services.AddSingleton<ICategoryParsingService>(
             provider => provider.GetRequiredService<SoftwareDistributivesDetector>());
-        services.AddSingleton<IFileCategoryParsingService>(
+        services.AddSingleton<ICategoryParsingService>(
             provider => provider.GetRequiredService<DocumentImageParsingService>());
         services.AddSingleton<IEnumerable<ICategory>>(provider =>
         {

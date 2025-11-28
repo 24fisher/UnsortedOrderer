@@ -2,11 +2,10 @@ using System.Linq;
 using MetadataExtractor;
 using MetadataExtractor.Formats.FileSystem;
 using MetadataExtractor.Formats.QuickTime;
-using UnsortedOrderer.Contracts.Services;
-
+using UnsortedOrderer.Application.Contracts.Services.Categories;
 using Directory = MetadataExtractor.Directory;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories.Video;
 
 public class VideoDateService : IVideoDateService
 {

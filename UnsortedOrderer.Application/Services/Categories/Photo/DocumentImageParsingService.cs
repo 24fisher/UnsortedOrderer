@@ -7,9 +7,9 @@ using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories.Photo;
 
-public sealed class DocumentImageParsingService : IFileCategoryParsingService
+public sealed class DocumentImageParsingService : ICategoryParsingService
 {
     private readonly HashSet<string> _documentImageKeywords;
     private readonly HashSet<string> _imageExtensions;

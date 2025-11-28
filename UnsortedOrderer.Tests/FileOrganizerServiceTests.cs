@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;

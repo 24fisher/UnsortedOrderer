@@ -1,7 +1,8 @@
 using System;
 using System.IO;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 using UnsortedOrderer.Categories;
-using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 using Xunit;
 

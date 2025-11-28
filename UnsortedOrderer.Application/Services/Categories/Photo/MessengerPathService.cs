@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using UnsortedOrderer.Contracts.Services;
-
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 using Path = System.IO.Path;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories.Photo;
 
 public sealed class MessengerPathService : IMessengerPathService
 {

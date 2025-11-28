@@ -1,4 +1,5 @@
 using System.IO;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Services;
@@ -12,12 +13,12 @@ public sealed class MusicCategory : FileCategory, INonSplittableDirectoryCategor
         ".mp3", ".wav", ".flac", ".aac", ".m4a", ".ogg", ".wma", ".aiff", ".alac", ".opus"
     ];
 
-    private readonly IFileCategoryParsingService _musicCategoryParsingService;
+    private readonly ICategoryParsingService _musicCategoryParsingService;
 
     public MusicCategory(string folderName, IMusicDirectoryDetector musicDirectoryDetector)
         : base("Music", folderName, MusicExtensions)
     {
-        _musicCategoryParsingService = musicDirectoryDetector as IFileCategoryParsingService
+        _musicCategoryParsingService = musicDirectoryDetector as ICategoryParsingService
             ?? throw new ArgumentNullException(nameof(musicDirectoryDetector), "IMusicDirectoryDetector должен реализовывать IFileCategoryParsingService.");
     }
 

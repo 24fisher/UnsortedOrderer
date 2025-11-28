@@ -1,3 +1,4 @@
+using UnsortedOrderer.Application.Services.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Services;
 

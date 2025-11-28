@@ -4,10 +4,11 @@ using System.IO;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Categories;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories;
 
-public sealed class MusicDirectoryDetector : IMusicDirectoryDetector, IFileCategoryParsingService
+public sealed class MusicDirectoryDetector : IMusicDirectoryDetector, ICategoryParsingService
 {
     private static readonly HashSet<string> OptionalTextExtensions = new(StringComparer.OrdinalIgnoreCase)
     {

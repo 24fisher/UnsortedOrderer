@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
+using UnsortedOrderer.Application.Services.Categories.Photo;
 using UnsortedOrderer.Models;
-using UnsortedOrderer.Services;
 using Xunit;
 
 namespace UnsortedOrderer.Tests;

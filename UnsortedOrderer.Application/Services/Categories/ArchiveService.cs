@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 using UnsortedOrderer.Models;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories;
 
 public sealed class ArchiveService : IArchiveService
 {

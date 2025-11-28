@@ -3,9 +3,9 @@ using System.Linq;
 using System.Text;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
-using UnsortedOrderer.Contracts.Services;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories.Photo;
 
 public sealed class PhotoCameraMetadataService : IPhotoCameraMetadataService
 {

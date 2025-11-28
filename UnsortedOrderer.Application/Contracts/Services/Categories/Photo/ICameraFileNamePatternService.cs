@@ -1,6 +1,6 @@
 using UnsortedOrderer.Models;
 
-namespace UnsortedOrderer.Contracts.Services;
+namespace UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 
 public interface ICameraFileNamePatternService
 {

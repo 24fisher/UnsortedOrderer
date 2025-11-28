@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
+using UnsortedOrderer.Application.Contracts.Services.Categories;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
-namespace UnsortedOrderer.Services;
+namespace UnsortedOrderer.Application.Services.Categories;
 
-public sealed class SoftwareDistributivesDetector : IDistributionDetector, IFileCategoryParsingService
+public sealed class SoftwareDistributivesDetector : IDistributionDetector, ICategoryParsingService
 {
     private static readonly string[] InstallerExtensions = [
         ".exe", ".msi", ".msix", ".apk", ".dmg", ".pkg", ".deb", ".rpm", ".appimage", ".iso"

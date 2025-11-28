@@ -1,3 +1,5 @@
+using UnsortedOrderer.Application.Contracts.Services.Categories;
+using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
 using UnsortedOrderer.Cache;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
@@ -20,7 +22,7 @@ public sealed class FileOrganizerService
     private readonly DriversCategory? _driversCategory;
     private readonly PhotosCategory? _photosCategory;
     private readonly ImagesCategory? _imagesCategory;
-    private readonly IReadOnlyCollection<IFileCategoryParsingService> _categoryParsingServices;
+    private readonly IReadOnlyCollection<ICategoryParsingService> _categoryParsingServices;
     private readonly CategoryCache _categoryCache;
     private readonly UnknownCategory _unknownCategory;
     private readonly HashSet<string> _deletedExtensions;
@@ -32,7 +34,7 @@ public sealed class FileOrganizerService
         IPhotoService photoService,
         IMessengerPathService messengerPathService,
         IEnumerable<ICategory> categories,
-        IEnumerable<IFileCategoryParsingService> categoryParsingServices,
+        IEnumerable<ICategoryParsingService> categoryParsingServices,
         IStatisticsService statisticsService,
         IMessageWriter messageWriter)
     {
@@ -241,13 +243,13 @@ public sealed class FileOrganizerService
     }
 
     private static bool IsFileOfCategory(
-        IFileCategoryParsingService parsingService,
+        ICategoryParsingService parsingService,
         ICategory category,
         string filePath)
     {
         var methodInfo = parsingService
             .GetType()
-            .GetMethod(nameof(IFileCategoryParsingService.IsFileOfCategory));
+            .GetMethod(nameof(ICategoryParsingService.IsFileOfCategory));
 
         if (methodInfo is null)
         {
