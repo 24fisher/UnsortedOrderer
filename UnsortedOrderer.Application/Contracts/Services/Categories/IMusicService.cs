@@ -1,6 +1,6 @@
 namespace UnsortedOrderer.Application.Contracts.Services.Categories;
 
-public interface IMusicDirectoryDetector
+public interface IMusicService
 {
     bool IsMusicDirectory(string path);
 }

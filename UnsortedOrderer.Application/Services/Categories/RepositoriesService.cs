@@ -4,7 +4,7 @@ using UnsortedOrderer.Contracts.Services;
 
 namespace UnsortedOrderer.Application.Services.Categories;
 
-public sealed class RepositoryDetector : ICategoryParsingService
+public sealed class RepositoriesService : ICategoryParsingService
 {
     private const int DefaultMinimumCodeFiles = 3;
 
@@ -36,7 +36,7 @@ public sealed class RepositoryDetector : ICategoryParsingService
     private readonly HashSet<string> _codeExtensions;
     private readonly int _minimumCodeFiles;
 
-    public RepositoryDetector(IEnumerable<string> codeExtensions, int minimumCodeFiles = DefaultMinimumCodeFiles)
+    public RepositoriesService(IEnumerable<string> codeExtensions, int minimumCodeFiles = DefaultMinimumCodeFiles)
     {
         _codeExtensions = codeExtensions
             .Select(NormalizeExtension)

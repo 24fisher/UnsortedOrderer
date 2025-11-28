@@ -15,7 +15,7 @@ public sealed class MusicCategory : FileCategory, INonSplittableDirectoryCategor
 
     private readonly ICategoryParsingService _musicCategoryParsingService;
 
-    public MusicCategory(string folderName, IMusicDirectoryDetector musicDirectoryDetector)
+    public MusicCategory(string folderName, IMusicService musicDirectoryDetector)
         : base("Music", folderName, MusicExtensions)
     {
         _musicCategoryParsingService = musicDirectoryDetector as ICategoryParsingService

@@ -80,7 +80,7 @@ public class CategoryExtensionsTests
         public string? GetMessengerFolder(string filePath) => null;
     }
 
-    private sealed class StubMusicDirectoryDetector : IMusicDirectoryDetector
+    private sealed class StubMusicDirectoryDetector : IMusicService
     {
         public bool IsMusicDirectory(string path) => false;
     }

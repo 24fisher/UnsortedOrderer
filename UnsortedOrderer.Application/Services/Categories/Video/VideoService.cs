@@ -6,11 +6,11 @@ using UnsortedOrderer.Contracts.Services;
 
 namespace UnsortedOrderer.Application.Services.Categories.Video;
 
-public sealed class VideoParsingService : ICategoryParsingService
+public sealed class VideoService : ICategoryParsingService
 {
     private readonly HashSet<string> _videoExtensions;
 
-    public VideoParsingService()
+    public VideoService()
     {
         _videoExtensions = new HashSet<string>(VideosCategory.SupportedExtensions, StringComparer.OrdinalIgnoreCase);
     }

@@ -29,36 +29,36 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDownloadsCleanupService, DownloadsCleanupService>();
         services.AddSingleton<IPhotoCameraMetadataService, PhotoCameraMetadataService>();
         services.AddSingleton<IVideoDateService, VideoDateService>();
-        services.AddSingleton<VideoParsingService>();
+        services.AddSingleton<VideoService>();
         services.AddSingleton<IPhotoService, PhotoService>();
         services.AddSingleton<IStatisticsService, StatisticsService>();
-        services.AddSingleton<IMusicDirectoryDetector, MusicDirectoryDetector>();
-        services.AddSingleton<RepositoryDetector>(
-            _ => new RepositoryDetector(RepositoriesCategory.CodeExtensions));
-        services.AddSingleton<SoftwareDistributivesDetector>();
+        services.AddSingleton<IMusicService, MusicService>();
+        services.AddSingleton<RepositoriesService>(
+            _ => new RepositoriesService(RepositoriesCategory.CodeExtensions));
+        services.AddSingleton<SoftwareDistributivesService>();
         services.AddSingleton<DocumentImageParsingService>();
 
         services.AddSingleton<ICategoryParsingService>(
             provider => (ICategoryParsingService)provider.GetRequiredService<IPhotoService>());
         services.AddSingleton<ICategoryParsingService>(
-            provider => (ICategoryParsingService)provider.GetRequiredService<IMusicDirectoryDetector>());
+            provider => (ICategoryParsingService)provider.GetRequiredService<IMusicService>());
         services.AddSingleton<ICategoryParsingService>(
-            provider => provider.GetRequiredService<RepositoryDetector>());
+            provider => provider.GetRequiredService<RepositoriesService>());
         services.AddSingleton<ICategoryParsingService>(
-            provider => provider.GetRequiredService<SoftwareDistributivesDetector>());
+            provider => provider.GetRequiredService<SoftwareDistributivesService>());
         services.AddSingleton<ICategoryParsingService>(
             provider => provider.GetRequiredService<DocumentImageParsingService>());
         services.AddSingleton<ICategoryParsingService>(
-            provider => provider.GetRequiredService<VideoParsingService>());
+            provider => provider.GetRequiredService<VideoService>());
         services.AddSingleton<IEnumerable<ICategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
             var cameraFileNamePatternService = provider.GetRequiredService<IEnumerable<ICameraFileNamePatternService>>();
             var messengerPathService = provider.GetRequiredService<IMessengerPathService>();
             var videoDateService = provider.GetRequiredService<IVideoDateService>();
-            var musicDirectoryDetector = provider.GetRequiredService<IMusicDirectoryDetector>();
-            var repositoryDetector = provider.GetRequiredService<RepositoryDetector>();
-            var softwareDistributivesDetector = provider.GetRequiredService<SoftwareDistributivesDetector>();
+            var musicDirectoryDetector = provider.GetRequiredService<IMusicService>();
+            var repositoryDetector = provider.GetRequiredService<RepositoriesService>();
+            var softwareDistributivesDetector = provider.GetRequiredService<SoftwareDistributivesService>();
             return new ICategory[]
             {
                 new PhotosCategory(appSettings.PhotosFolderName),

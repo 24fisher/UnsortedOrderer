@@ -35,9 +35,9 @@ public sealed class RepositoriesCategory : FileCategory, INonSplittableDirectory
         ".scala"
     };
 
-    private readonly RepositoryDetector _repositoryDetector;
+    private readonly RepositoriesService _repositoryDetector;
 
-    public RepositoriesCategory(string folderName, RepositoryDetector repositoryDetector)
+    public RepositoriesCategory(string folderName, RepositoriesService repositoryDetector)
         : base("Repositories", folderName, CodeExtensions)
     {
         _repositoryDetector = repositoryDetector;

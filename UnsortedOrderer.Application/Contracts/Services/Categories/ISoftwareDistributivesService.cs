@@ -1,6 +1,6 @@
 namespace UnsortedOrderer.Application.Contracts.Services.Categories;
 
-public interface IDistributionDetector
+public interface ISoftwareDistributivesService
 {
     bool IsDistributionDirectory(string path);
 }

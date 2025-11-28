@@ -8,7 +8,7 @@ using UnsortedOrderer.Application.Contracts.Services.Categories;
 
 namespace UnsortedOrderer.Application.Services.Categories;
 
-public sealed class MusicDirectoryDetector : IMusicDirectoryDetector, ICategoryParsingService
+public sealed class MusicService : IMusicService, ICategoryParsingService
 {
     private static readonly HashSet<string> OptionalTextExtensions = new(StringComparer.OrdinalIgnoreCase)
     {

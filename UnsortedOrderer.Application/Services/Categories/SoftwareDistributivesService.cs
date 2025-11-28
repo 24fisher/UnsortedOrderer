@@ -5,7 +5,7 @@ using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Contracts.Services;
 namespace UnsortedOrderer.Application.Services.Categories;
 
-public sealed class SoftwareDistributivesDetector : IDistributionDetector, ICategoryParsingService
+public sealed class SoftwareDistributivesService : ISoftwareDistributivesService, ICategoryParsingService
 {
     private static readonly string[] InstallerExtensions = [
         ".exe", ".msi", ".msix", ".apk", ".dmg", ".pkg", ".deb", ".rpm", ".appimage", ".iso"
