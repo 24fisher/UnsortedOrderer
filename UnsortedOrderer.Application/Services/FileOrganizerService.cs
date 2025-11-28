@@ -17,14 +17,12 @@ public sealed class FileOrganizerService
     private readonly IReadOnlyCollection<ICategory> _categories;
     private readonly IReadOnlyCollection<INonSplittableDirectoryCategory> _nonSplittableCategories;
     private readonly IReadOnlyCollection<ImageCategoryBase> _imageCategories;
-    private readonly DocumentsCategory? _documentsCategory;
     private readonly DriversCategory? _driversCategory;
     private readonly PhotosCategory? _photosCategory;
     private readonly ImagesCategory? _imagesCategory;
     private readonly IReadOnlyCollection<IFileCategoryParsingService> _categoryParsingServices;
     private readonly CategoryCache _categoryCache;
     private readonly UnknownCategory _unknownCategory;
-    private readonly SpecialCategoriesHandler _specialCategoriesHandler;
     private readonly HashSet<string> _deletedExtensions;
     private readonly string[] _softwareArchiveKeywords;
 
@@ -47,17 +45,11 @@ public sealed class FileOrganizerService
         _categories = categories.ToArray();
         _nonSplittableCategories = _categories.OfType<INonSplittableDirectoryCategory>().ToArray();
         _imageCategories = _categories.OfType<ImageCategoryBase>().ToArray();
-        _documentsCategory = _categories.OfType<DocumentsCategory>().FirstOrDefault();
         _driversCategory = _categories.OfType<DriversCategory>().FirstOrDefault();
         _photosCategory = _imageCategories.OfType<PhotosCategory>().FirstOrDefault();
         _imagesCategory = _imageCategories.OfType<ImagesCategory>().FirstOrDefault();
         _categoryParsingServices = categoryParsingServices.ToArray();
         _categoryCache = new CategoryCache(_categories);
-        _specialCategoriesHandler = new SpecialCategoriesHandler(
-            _imageCategories,
-            _documentsCategory,
-            _categoryCache,
-            _settings.DocumentImageKeywords);
         _deletedExtensions = FileUtilities
             .NormalizeExtensions(settings.DeletedExtensions)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -145,8 +137,7 @@ public sealed class FileOrganizerService
             return;
         }
 
-        var category = _specialCategoriesHandler.TryGetSpecialCategory(filePath, extension)
-            ?? ResolveCategory(filePath, extension);
+        var category = ResolveCategory(filePath, extension);
         if (category is null)
         {
             _statisticsService.RecordUnknownFile(extension);
@@ -222,7 +213,7 @@ public sealed class FileOrganizerService
     private ICategory? TryResolveWithParsingServices(string filePath, string extension)
     {
         var matchingCategories = _categories
-            .Where(category => category.Matches(extension))
+            .Where(category => category.Matches(extension) || IsDocumentImageCategoryCandidate(category, extension))
             .ToArray();
 
         if (matchingCategories.Length == 0)
@@ -242,6 +233,11 @@ public sealed class FileOrganizerService
         }
 
         return null;
+    }
+
+    private bool IsDocumentImageCategoryCandidate(ICategory category, string extension)
+    {
+        return category is DocumentsCategory && _categoryCache.ImageCategoryExtensions.Contains(extension);
     }
 
     private static bool IsFileOfCategory(

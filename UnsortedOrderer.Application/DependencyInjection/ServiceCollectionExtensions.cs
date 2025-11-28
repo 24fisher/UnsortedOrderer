@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<RepositoryDetector>(
             _ => new RepositoryDetector(RepositoriesCategory.CodeExtensions));
         services.AddSingleton<SoftwareDistributivesDetector>();
+        services.AddSingleton<DocumentImageParsingService>();
 
         services.AddSingleton<IFileCategoryParsingService>(
             provider => (IFileCategoryParsingService)provider.GetRequiredService<IPhotoService>());
@@ -39,6 +40,8 @@ public static class ServiceCollectionExtensions
             provider => provider.GetRequiredService<RepositoryDetector>());
         services.AddSingleton<IFileCategoryParsingService>(
             provider => provider.GetRequiredService<SoftwareDistributivesDetector>());
+        services.AddSingleton<IFileCategoryParsingService>(
+            provider => provider.GetRequiredService<DocumentImageParsingService>());
         services.AddSingleton<IEnumerable<ICategory>>(provider =>
         {
             var appSettings = provider.GetRequiredService<AppSettings>();
