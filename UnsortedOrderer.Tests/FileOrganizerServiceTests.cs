@@ -14,7 +14,7 @@ using Xunit;
 
 namespace UnsortedOrderer.Tests;
 
-public class FileOrganizerServiceTests
+public partial class FileOrganizerServiceTests
 {
     [Fact]
     public void RepositoryInsideWrapperDirectories_IsExtractedAndMoved()
@@ -286,23 +286,6 @@ public class FileOrganizerServiceTests
         public string HandleArchive(string archivePath, string destinationDirectory)
         {
             return FileUtilities.MoveFile(archivePath, destinationDirectory);
-        }
-    }
-
-    private sealed class StubPhotoService : IPhotoService
-    {
-        public StubPhotoService(bool isPhoto)
-        {
-            _isPhoto = isPhoto;
-        }
-
-        private readonly bool _isPhoto;
-
-        public bool IsPhoto(string filePath) => _isPhoto;
-
-        public string MovePhoto(string filePath, string destinationRoot, string photosFolderName)
-        {
-            throw new NotSupportedException();
         }
     }
 

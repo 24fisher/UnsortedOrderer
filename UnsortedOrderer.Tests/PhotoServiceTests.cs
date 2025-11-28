@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.Serialization;
 using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
+using UnsortedOrderer.Application.Services.Categories.Photo;
 using UnsortedOrderer.Models;
 using UnsortedOrderer.Services;
 using Xunit;

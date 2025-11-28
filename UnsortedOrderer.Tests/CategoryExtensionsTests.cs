@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnsortedOrderer.Application.Contracts.Services.Categories;
 using UnsortedOrderer.Application.Contracts.Services.Categories.Photo;
+using UnsortedOrderer.Application.Services.Categories;
+using UnsortedOrderer.Application.Services.Categories.Video;
 using UnsortedOrderer.Categories;
 using UnsortedOrderer.Contracts.Categories;
 using UnsortedOrderer.Models;
@@ -53,8 +55,8 @@ public class CategoryExtensionsTests
             new DriversCategory("Drivers"),
             new RepositoriesCategory(
                 "Repositories",
-                new RepositoryDetector(RepositoriesCategory.CodeExtensions, 3)),
-            new SoftCategory("Soft", new SoftwareDistributivesDetector()),
+                new RepositoriesService(RepositoriesCategory.CodeExtensions, 3)),
+            new SoftCategory("Soft", new SoftwareDistributivesService()),
             new UnknownCategory("Unknown"),
         };
     }
